@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-dash-bg: #0F172A;
+  --color-dash-surface: #1E293B;
+  --color-dash-border: #334155;
+  --color-dash-primary: #6366F1;
+  --color-dash-primary-hover: #5558E6;
+  --color-dash-success: #22C55E;
+  --color-dash-warning: #F59E0B;
+  --color-dash-danger: #EF4444;
+  --color-dash-text: #F8FAFC;
+  --color-dash-muted: #94A3B8;
+  --color-dash-hover: #1E3A5F;
+}
+
+/* Page transition */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}

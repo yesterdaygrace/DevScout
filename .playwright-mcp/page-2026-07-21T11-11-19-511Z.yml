@@ -1,0 +1,53 @@
+- generic [ref=e2]:
+  - alert [ref=e3]:
+    - generic [ref=e4]:
+      - text: Back online
+      - button "Dismiss notification" [ref=e5]
+  - generic [ref=e8]:
+    - banner [ref=e9]:
+      - generic [ref=e11]:
+        - link "Talent Directory" [ref=e12] [cursor=pointer]:
+          - /url: /
+        - navigation [ref=e13]:
+          - link "Search" [ref=e14] [cursor=pointer]:
+            - /url: /search
+          - link "Saved" [ref=e17] [cursor=pointer]:
+            - /url: /searches
+          - link "Collections" [ref=e18] [cursor=pointer]:
+            - /url: /collections
+          - link "Notes" [ref=e19] [cursor=pointer]:
+            - /url: /notes-search
+          - button "Theme settings" [ref=e21]
+          - button "Sign out" [ref=e24]: Logout
+    - main [ref=e27]:
+      - generic [ref=e28]:
+        - heading "Dashboard" [level=1] [ref=e29]
+        - generic [ref=e30]:
+          - link "Searches 0 recent searches" [ref=e31] [cursor=pointer]:
+            - /url: /search
+            - generic [ref=e32]: Searches
+            - paragraph [ref=e36]: "0"
+            - paragraph [ref=e37]: recent searches
+          - link "Collections 0 candidate groups" [ref=e38] [cursor=pointer]:
+            - /url: /collections
+            - generic [ref=e39]: Collections
+            - paragraph [ref=e43]: "0"
+            - paragraph [ref=e44]: candidate groups
+          - link "Saved 0 saved searches" [ref=e45] [cursor=pointer]:
+            - /url: /searches
+            - generic [ref=e46]: Saved
+            - paragraph [ref=e50]: "0"
+            - paragraph [ref=e51]: saved searches
+          - generic [ref=e52]:
+            - generic [ref=e53]: Shortlist
+            - paragraph [ref=e57]: "0"
+            - paragraph [ref=e58]: candidates
+        - generic [ref=e59]:
+          - heading "Recently Viewed" [level=2] [ref=e60]
+          - generic [ref=e63]:
+            - text: No profiles viewed yet.
+            - link "Search developers" [ref=e64] [cursor=pointer]:
+              - /url: /search
+        - generic [ref=e65]:
+          - heading "Shortlist" [level=2] [ref=e67]
+          - generic [ref=e70]: No developers shortlisted yet.
