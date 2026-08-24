@@ -1,5 +1,6 @@
-import { handle } from 'hono/vercel'
-// Root and server resolve separate hono copies; runtime-compatible, so bridge the types here.
-import app from '../server/src/app.js'
-
-export default handle(app as unknown as Parameters<typeof handle>[0])
+// TEMPORARY bisect: minimal handler to isolate runtime vs app-bundle hang
+export default async function () {
+  return new Response(JSON.stringify({ ok: true, bisect: 'minimal' }), {
+    headers: { 'content-type': 'application/json' },
+  })
+}
