@@ -1,6 +1,8 @@
-// TEMPORARY bisect: minimal handler to isolate runtime vs app-bundle hang
-export default async function () {
-  return new Response(JSON.stringify({ ok: true, bisect: 'minimal' }), {
-    headers: { 'content-type': 'application/json' },
-  })
+// TEMPORARY bisect #2: Node.js-style handler signature
+interface Res {
+  status: (code: number) => { json: (body: unknown) => void }
+}
+
+export default function handler(_req: unknown, res: Res) {
+  res.status(200).json({ ok: true, sig: 'node-style' })
 }
