@@ -22,7 +22,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), { loading: false })
 
-const COLORS = ['#6366F1', '#8B5CF6', '#A855F7', '#EC4899', '#F43F5E']
+const COLORS = ['#6366F1', '#8B5CF6', '#EC4899', '#F43F5E', '#F59E0B']
 
 // Limit to top 5
 const topData = computed(() => (props.data || []).slice(0, 5))
@@ -41,12 +41,12 @@ const centerTextPlugin = {
     // Total number
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.font = '700 24px Inter, system-ui, sans-serif'
-    ctx.fillStyle = '#F1F5F9'
+    ctx.font = '700 24px "Work Sans", ui-sans-serif, system-ui, sans-serif'
+    ctx.fillStyle = '#F8FAFC'
     ctx.fillText(String(totalLanguages.value), centerX, centerY - 8)
 
     // Label below
-    ctx.font = '400 11px Inter, system-ui, sans-serif'
+    ctx.font = '400 11px "Work Sans", ui-sans-serif, system-ui, sans-serif'
     ctx.fillStyle = '#94A3B8'
     ctx.fillText('languages', centerX, centerY + 18)
 
@@ -91,17 +91,19 @@ const chartOptions = {
 </script>
 
 <template>
-  <div class="bg-dash-surface rounded-xl border border-dash-border/60 p-5 min-h-[320px] flex flex-col">
-    <h3 class="text-sm font-semibold text-dash-text mb-4">Language Distribution</h3>
+  <div class="bg-dash-card rounded-xl border border-dash-border p-5 min-h-[320px] flex flex-col">
+    <h3 class="text-sm font-semibold text-dash-text-secondary mb-4">Language Distribution</h3>
 
     <div v-if="loading" class="flex-1">
       <SkeletonCard type="chart" />
     </div>
     <div v-else-if="!data || data.length === 0" class="flex-1 flex items-center justify-center">
       <div class="text-center">
-        <p class="text-2xl mb-2">🔤</p>
-        <p class="text-sm text-dash-muted">No language data yet</p>
-        <p class="text-xs text-dash-muted/60 mt-1">Languages appear when you filter by language in search.</p>
+        <div class="w-12 h-12 rounded-xl bg-dash-border/10 flex items-center justify-center mx-auto mb-3">
+          <svg class="w-5 h-5 text-dash-text-tertiary" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.007 2.88 10.507c-.5.22-.5.816 0 1.04l9.12 4.5 9.12-4.5c.5-.22.5-.816 0-1.04L12 6.007z" /></svg>
+        </div>
+        <p class="text-sm text-dash-text-tertiary">No language data yet</p>
+        <p class="text-xs text-dash-text-tertiary/60 mt-1">Languages appear when you filter by language in search.</p>
       </div>
     </div>
     <template v-else>
@@ -117,12 +119,12 @@ const chartOptions = {
           class="flex items-center gap-2 px-1 py-1 rounded-md hover:bg-dash-border/10 transition-colors"
         >
           <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" :style="{ backgroundColor: COLORS[idx] }" />
-          <span class="text-xs text-dash-muted truncate flex-1">{{ item.name }}</span>
-          <span class="text-xs font-medium text-dash-text tabular-nums">{{ item.count }}</span>
-          <span class="text-[11px] text-dash-muted/60 tabular-nums w-[38px] text-right">{{ item.percentage }}%</span>
+          <span class="text-xs text-dash-text-tertiary truncate flex-1">{{ item.name }}</span>
+          <span class="text-xs font-medium text-dash-text-secondary tabular-nums">{{ item.count }}</span>
+          <span class="text-[11px] text-dash-text-tertiary tabular-nums w-[38px] text-right">{{ item.percentage }}%</span>
         </div>
       </div>
-      <div v-if="data && data.length > 5" class="mt-2 text-[11px] text-dash-muted/50 text-center">
+      <div v-if="data && data.length > 5" class="mt-2 text-[11px] text-dash-text-tertiary/50 text-center">
         +{{ data.length - 5 }} more languages
       </div>
     </template>

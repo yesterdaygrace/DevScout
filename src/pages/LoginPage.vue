@@ -54,46 +54,46 @@ async function handleGithubLogin() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
-    <div class="max-w-md w-full space-y-8">
+  <div class="min-h-screen flex items-center justify-center bg-dash-bg px-4">
+    <div class="max-w-md w-full">
       <div class="text-center">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">DevScout</h1>
-        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+        <h1 class="text-3xl font-bold text-dash-text">DevScout</h1>
+        <p class="mt-2 text-sm text-dash-text-secondary">
           Sign in to search and shortlist developers
         </p>
       </div>
 
-      <form @submit.prevent="handleSubmit" class="mt-8 space-y-6 bg-white dark:bg-gray-800 p-8 rounded-lg shadow">
-        <div v-if="error" class="text-sm text-red-600 dark:text-red-400 text-center">
+      <form @submit.prevent="handleSubmit" class="mt-8 space-y-6 bg-dash-card border border-dash-border rounded-xl p-8">
+        <div v-if="error" class="text-sm text-dash-danger text-center">
           {{ error }}
         </div>
 
         <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+          <label for="email" class="block text-sm font-medium text-dash-text-secondary">Email</label>
           <input
             id="email"
             v-model="email"
             type="email"
             required
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
+            class="mt-1 block w-full px-3 py-2 border border-dash-border rounded-lg bg-dash-bg text-sm text-dash-text-secondary focus:ring-2 focus:ring-dash-primary focus:border-dash-primary"
           />
         </div>
 
         <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+          <label for="password" class="block text-sm font-medium text-dash-text-secondary">Password</label>
           <input
             id="password"
             v-model="password"
             type="password"
             required
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
+            class="mt-1 block w-full px-3 py-2 border border-dash-border rounded-lg bg-dash-bg text-sm text-dash-text-secondary focus:ring-2 focus:ring-dash-primary focus:border-dash-primary"
           />
         </div>
 
         <button
           type="submit"
           :disabled="isLoading"
-          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-dash-primary hover:bg-dash-primary-hover focus:outline-none focus:ring-2 focus:ring-dash-primary disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
         >
           <template v-if="isLoading">Loading...</template>
           <template v-else>{{ isSignup ? 'Sign Up' : 'Sign In' }}</template>
@@ -102,10 +102,10 @@ async function handleGithubLogin() {
         <template v-if="showGithubButton">
           <div class="relative my-6">
             <div class="absolute inset-0 flex items-center">
-              <div class="w-full border-t border-gray-300 dark:border-gray-600" />
+              <div class="w-full border-t border-dash-border" />
             </div>
             <div class="relative flex justify-center text-sm">
-              <span class="px-2 bg-white dark:bg-gray-800 text-gray-500">Or continue with</span>
+              <span class="px-2 bg-dash-card text-dash-text-tertiary">Or continue with</span>
             </div>
           </div>
 
@@ -113,7 +113,7 @@ async function handleGithubLogin() {
             type="button"
             @click="handleGithubLogin"
             :disabled="isLoading"
-            class="w-full flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="w-full flex items-center justify-center gap-2 py-2 px-4 border border-dash-border rounded-lg text-sm font-medium text-dash-text-secondary bg-dash-bg hover:bg-dash-border/20 focus:ring-2 focus:ring-dash-primary disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
             aria-label="Sign in with GitHub"
           >
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -123,9 +123,9 @@ async function handleGithubLogin() {
           </button>
         </template>
 
-        <p class="text-center text-sm text-gray-600 dark:text-gray-400">
+        <p class="text-center text-sm text-dash-text-secondary">
           {{ isSignup ? 'Already have an account?' : "Don't have an account?" }}
-          <button type="button" @click="isSignup = !isSignup" class="text-indigo-600 dark:text-indigo-400 hover:underline">
+          <button type="button" @click="isSignup = !isSignup" class="text-dash-primary hover:underline cursor-pointer">
             {{ isSignup ? 'Sign In' : 'Sign Up' }}
           </button>
         </p>

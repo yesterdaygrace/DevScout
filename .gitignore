@@ -22,3 +22,20 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Build artifacts
+playwright-report/
+test-results/
+coverage/
+
+# Vercel
+.vercel
+
+# Orca / OMO
+.omo/
+
+# Lockfile duplicates (project uses npm)
+pnpm-lock.yaml
+server/pnpm-lock.yaml
+server/pnpm-workspace.yaml
+server/.npmrc

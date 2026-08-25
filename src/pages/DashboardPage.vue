@@ -4,9 +4,7 @@ import { useDashboardStats } from '../composables/useDashboardStats'
 import { useRecentlyViewedStore } from '../stores/recentlyViewed'
 import { useShortlistStore } from '../stores/shortlist'
 import { useSavedSearchesStore } from '../stores/savedSearches'
-import { useSearchHistory } from '../composables/useSearchHistory'
 
-import GreetingSection from '../components/dashboard/GreetingSection.vue'
 import KPIGrid from '../components/dashboard/KPIGrid.vue'
 import SearchAnalytics from '../components/dashboard/SearchAnalytics.vue'
 import LanguageDistribution from '../components/dashboard/LanguageDistribution.vue'
@@ -27,7 +25,6 @@ const {
 const recentlyViewedStore_local = useRecentlyViewedStore()
 const shortlistStore = useShortlistStore()
 const savedSearchesStore = useSavedSearchesStore()
-const { history: searchHistory } = useSearchHistory()
 
 const loading = ref(true)
 const recentlyCompared = ref<string[][]>([])
@@ -57,9 +54,6 @@ function loadRecentlyCompared() {
   } catch { /* ignore */ }
 }
 
-const lastQuery = searchHistory.value[0]?.query || null
-
-// KPI metrics mapped to component props
 const kpiData = [
   { title: 'Searches', value: kpiMetrics.value.searches.total, secondary: `${kpiMetrics.value.searches.today} today`, icon: 'search', trend: kpiMetrics.value.searches.trend, link: '/search', color: 'indigo' },
   { title: 'Collections', value: kpiMetrics.value.collections.total, secondary: `${kpiMetrics.value.collections.totalMembers} candidates`, icon: 'collection', trend: null, link: '/collections', color: 'emerald' },
@@ -68,37 +62,38 @@ const kpiData = [
 ]
 </script>
 
-<template>
-  <div class="space-y-8">
-    <!-- Hero with API Usage in top-right corner -->
-    <GreetingSection :username="'Rizky'" :last-query="lastQuery" />
+ <template>
+  <div class="space-y-12 lg:space-y-16">
+    <!-- Metrics — uniform cards -->
+    <section>
+      <KPIGrid :metrics="kpiData" :loading="loading" />
+    </section>
 
-    <!-- KPI Grid (4 cols) -->
-    <KPIGrid :metrics="kpiData" :loading="loading" />
-
-    <!-- Workspace: Main Content (70%) + Sticky Sidebar (30%) — entire section -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-      <!-- Main Content: charts row + 3 tall cards row below -->
+    <!-- Workspace: asymmetric — charts left (66%), actions right (33%) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+      <!-- Main: charts + collections row -->
       <div class="lg:col-span-8 space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <SearchAnalytics :data="searchAnalytics" :loading="loading" />
           <LanguageDistribution :data="languageDistribution" :loading="loading" />
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <RecentCollections :collections="collectionsStore.collections" :loading="loading" class="min-h-[220px]" />
-          <RecentlyViewed :items="recentlyViewedStore_local.items" :loading="loading" class="min-h-[220px]" />
-          <RecentlyCompared :comparisons="recentlyCompared" class="min-h-[220px]" />
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <RecentCollections :collections="collectionsStore.collections" :loading="loading" />
+          <RecentlyViewed :items="recentlyViewedStore_local.items" :loading="loading" />
+          <RecentlyCompared :comparisons="recentlyCompared" />
         </div>
       </div>
 
-      <!-- Right Sidebar: Quick Actions + Activity Feed — sticky -->
-      <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-6 self-start">
+      <!-- Sidebar: sticky, muted -->
+      <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-[88px] self-start">
         <QuickActions @action="() => {}" />
         <ActivityFeed :events="activityFeed" :loading="loading" />
       </div>
     </div>
 
-    <!-- Bottom Insights: 4 equal cards -->
-    <InsightsPanel :data="insights" :loading="loading" />
+    <!-- Insights — restrained footer -->
+    <section class="pt-6 border-t border-white/[0.06]">
+      <InsightsPanel :data="insights" :loading="loading" />
+    </section>
   </div>
 </template>

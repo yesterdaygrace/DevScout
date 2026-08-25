@@ -75,10 +75,6 @@ const allTopics = computed(() => {
 
 const prCount = ref(0)
 
-const totalOpenIssues = computed(() =>
-  repos.value.reduce((sum, r) => sum + (r.open_issues_count || 0), 0)
-)
-
 const programmingLanguages = computed(() => {
   const langSet = new Set<string>()
   repos.value.slice(0, 30).forEach(repo => {
@@ -102,7 +98,7 @@ const chartData = computed(() => ({
 const chartOptions = {
   responsive: true,
   plugins: {
-    legend: { position: 'bottom' as const, labels: { padding: 16, font: { size: 12 } } },
+    legend: { position: 'bottom' as const, labels: { padding: 16, font: { size: 12 }, color: '#94A3B8' } },
   },
 }
 
@@ -133,55 +129,50 @@ watch(username, loadProfile)
 </script>
 
 <template>
-  <div v-if="loading" class="text-center py-12 text-gray-500">
+  <div v-if="loading" class="py-12">
     <div class="animate-pulse space-y-8">
-      <div class="flex flex-col sm:flex-row items-start gap-6">
-        <div class="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" aria-hidden="true" />
-        <div class="flex-1 space-y-3 flex-1">
-          <div class="h-8 w-1/3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" aria-hidden="true" />
-          <div class="h-4 w-1/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" aria-hidden="true" />
-          <div class="h-4 w-1/2 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" aria-hidden="true" />
+      <div class="flex gap-6">
+        <div class="w-28 h-28 rounded-full bg-white/10" />
+        <div class="flex-1 space-y-3">
+          <div class="h-8 w-1/3 bg-white/10 rounded" />
+          <div class="h-4 w-1/2 bg-white/5 rounded" />
         </div>
       </div>
     </div>
   </div>
 
-  <div v-else-if="error" class="text-center py-12 text-red-500">
+  <div v-else-if="error" class="text-center py-16 rounded-[var(--radius-lg)] border border-red-500/20 bg-red-500/5 text-red-300 text-sm">
     {{ error }}
   </div>
 
-  <div v-else-if="profile" class="space-y-8">
-    <div class="flex flex-col sm:flex-row items-start gap-6">
-      <img :src="profile.avatar_url" :alt="profile.login" class="w-24 h-24 rounded-full" loading="lazy" />
-      <div class="flex-1">
-        <h1 class="text-2xl font-bold">{{ profile.name || profile.login }}</h1>
-        <p class="text-gray-500">@{{ profile.login }}</p>
-        <p v-if="profile.bio" class="mt-2 text-gray-600 dark:text-gray-300">{{ profile.bio }}</p>
-        <div class="mt-3 flex flex-wrap gap-4 text-sm text-gray-500">
-          <span v-if="profile.location">{{ profile.location }}</span>
-          <span v-if="profile.company" class="flex items-center gap-1">🏢 {{ profile.company }}</span>
-          <span>{{ profile.public_repos }} public repos</span>
-          <span>{{ profile.followers }} followers</span>
-          <span>{{ profile.following }} following</span>
-          <span>{{ totalOpenIssues }} open issues</span>
-          <span v-if="prCount">{{ prCount }} PRs</span>
+  <div v-else-if="profile" class="space-y-12 lg:space-y-16">
+    <!-- Hero — image-dominant, editorial -->
+    <section class="flex flex-col lg:flex-row items-start gap-8 lg:gap-10">
+      <img :src="profile.avatar_url" :alt="profile.login" class="w-28 h-28 lg:w-36 lg:h-36 rounded-full object-cover ring-1 ring-white/10 shrink-0" loading="lazy" />
+      <div class="flex-1 min-w-0">
+        <p class="text-[11px] font-semibold tracking-[0.18em] uppercase text-white/30 mb-2">@{{ profile.login }}</p>
+        <h1 class="text-section text-white leading-none">{{ profile.name || profile.login }}</h1>
+        <p v-if="profile.bio" class="mt-4 text-white/50 text-base max-w-2xl leading-relaxed">{{ profile.bio }}</p>
+
+        <div class="mt-4 flex flex-wrap gap-2 text-xs">
+          <span v-if="profile.location" class="px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-white/60">{{ profile.location }}</span>
+          <span v-if="profile.company" class="px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-white/60">{{ profile.company }}</span>
+          <span class="px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-white/60">{{ profile.public_repos }} repos</span>
+          <span class="px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-white/60">{{ profile.followers }} followers · {{ profile.following }} following</span>
+          <span v-if="prCount" class="px-3 py-1 rounded-full bg-white text-black font-medium">{{ prCount }} PRs</span>
         </div>
-        <div class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-          <a v-if="profile.blog" :href="profile.blog.startsWith('http') ? profile.blog : 'https://' + profile.blog" target="_blank" rel="noopener" class="text-indigo-500 hover:underline">
-            🌐 {{ profile.blog }}
-          </a>
-          <a v-if="profile.email" :href="'mailto:' + profile.email" class="text-indigo-500 hover:underline">
-            📧 {{ profile.email }}
-          </a>
-          <a v-if="profile.twitter_username" :href="'https://twitter.com/' + profile.twitter_username" target="_blank" rel="noopener" class="text-indigo-500 hover:underline">
-            🐦 @{{ profile.twitter_username }}
-          </a>
+
+        <div class="mt-3 flex flex-wrap gap-2 text-xs text-white/40">
+          <a v-if="profile.blog" :href="profile.blog.startsWith('http') ? profile.blog : 'https://' + profile.blog" target="_blank" rel="noopener" class="hover:text-white underline underline-offset-4">{{ profile.blog }}</a>
+          <a v-if="profile.email" :href="'mailto:' + profile.email" class="hover:text-white underline underline-offset-4">{{ profile.email }}</a>
+          <a v-if="profile.twitter_username" :href="'https://twitter.com/' + profile.twitter_username" target="_blank" rel="noopener" class="hover:text-white">@{{ profile.twitter_username }}</a>
         </div>
-        <div class="mt-4 flex flex-wrap gap-2">
+
+        <div class="mt-6 flex flex-wrap gap-2">
           <button
             @click="shortlistStore.isShortlisted(profile.login) ? shortlistStore.remove(profile.login) : shortlistStore.add(profile.login)"
-            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm border"
-            :class="shortlistStore.isShortlisted(profile.login) ? 'bg-yellow-50 border-yellow-300 text-yellow-700 dark:bg-yellow-900/20 dark:border-yellow-600 dark:text-yellow-400' : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors cursor-pointer"
+            :class="shortlistStore.isShortlisted(profile.login) ? 'bg-white text-black' : 'bg-white text-black hover:bg-white/90'"
           >
             <StarSolid v-if="shortlistStore.isShortlisted(profile.login)" class="w-4 h-4" />
             <StarOutline v-else class="w-4 h-4" />
@@ -190,116 +181,94 @@ watch(username, loadProfile)
           <button
             @click="compareStore.add(profile.login)"
             :disabled="compareStore.isSelected(profile.login) || compareStore.usernames.length >= 3"
-            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-30"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium border border-white/15 text-white hover:bg-white/10 hover:border-white/20 disabled:opacity-30 cursor-pointer"
           >
             <DocumentPlusIcon class="w-4 h-4" />
-            {{ compareStore.isSelected(profile.login) ? 'Added to Compare' : 'Compare' }}
+            {{ compareStore.isSelected(profile.login) ? 'In compare' : 'Compare' }}
           </button>
-          <div class="relative inline-block">
+          <div class="relative">
             <button
               @click="showCollectionPicker = !showCollectionPicker"
-              class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium border border-white/15 text-white hover:bg-white/10 cursor-pointer"
             >
               <FolderPlusIcon class="w-4 h-4" />
-              Add to Collection
+              Add to collection
             </button>
             <div
               v-if="showCollectionPicker"
-              class="absolute z-20 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+              class="absolute z-20 mt-2 w-56 bg-[#0F172A] border border-white/10 rounded-[var(--radius-lg)] shadow-2xl overflow-hidden"
             >
               <div class="p-1">
-                <div v-if="collectionsStore.collections.length === 0" class="px-3 py-2 text-sm text-gray-400">
-                  No collections yet
-                </div>
+                <div v-if="collectionsStore.collections.length === 0" class="px-3 py-2 text-sm text-white/30">No collections yet</div>
                 <button
                   v-for="col in collectionsStore.collections"
                   :key="col.id"
                   @click="addToCollection(col.id)"
-                  class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                  class="w-full text-left px-3 py-2 text-sm text-white/80 hover:bg-white/[0.06] rounded-[var(--radius-md)] transition-colors cursor-pointer"
                 >
                   {{ col.name }}
                 </button>
               </div>
             </div>
           </div>
-          <a
-            :href="profile.html_url"
-            target="_blank"
-            rel="noopener"
-            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-          >
-            GitHub Profile →
-          </a>
+          <a :href="profile.html_url" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium border border-white/15 text-white/60 hover:text-white hover:bg-white/10 cursor-pointer">GitHub →</a>
         </div>
       </div>
-    </div>
+    </section>
 
-    <section>
-      <h2 class="text-lg font-semibold mb-3">Skill Breakdown</h2>
-      <div v-if="skillsLoading" class="text-gray-400">Analyzing repositories...</div>
-      <div v-else-if="skills.length === 0" class="text-gray-400 text-sm">No language data available.</div>
-      <div v-else class="flex flex-col sm:flex-row items-center gap-8">
-        <div class="w-64 h-64">
+    <section class="rounded-[var(--radius-lg)] border border-white/10 bg-white/[0.04] p-6 lg:p-8">
+      <h2 class="text-headline text-white mb-6">Skill breakdown</h2>
+      <div v-if="skillsLoading" class="text-white/40 text-sm">Analyzing repositories…</div>
+      <div v-else-if="skills.length === 0" class="text-white/30 text-sm">No language data yet.</div>
+      <div v-else class="flex flex-col lg:flex-row items-center gap-8">
+        <div class="w-64 h-64 shrink-0">
           <Doughnut :data="chartData" :options="chartOptions" />
         </div>
-        <div class="flex-1 space-y-2 w-full">
+        <div class="flex-1 space-y-3 w-full">
           <div v-for="skill in skills.slice(0, 8)" :key="skill.language" class="flex items-center gap-3">
-            <span class="text-sm font-medium w-24 truncate">{{ skill.language }}</span>
-            <div class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div
-                class="h-full rounded-full bg-indigo-500"
-                :style="{ width: skill.percentage + '%' }"
-              />
+            <span class="text-sm font-medium w-28 truncate text-white/80">{{ skill.language }}</span>
+            <div class="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+              <div class="h-full rounded-full bg-white" :style="{ width: skill.percentage + '%' }" />
             </div>
-            <span class="text-xs text-gray-500 w-12 text-right">{{ skill.percentage }}%</span>
+            <span class="text-xs text-white/40 w-12 text-right tabular-nums">{{ skill.percentage }}%</span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Repository Insights -->
-    <section class="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
-      <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-        <CodeBracketIcon class="w-5 h-5 text-indigo-500" />
-        Repository Insights
+    <!-- Repository Insights — restrained -->
+    <section class="rounded-[var(--radius-lg)] border border-white/10 bg-white/[0.04] p-6 lg:p-8">
+      <h2 class="text-headline text-white mb-6 flex items-center gap-2">
+        <CodeBracketIcon class="w-5 h-5 text-white/40" />
+        Repository insights
       </h2>
       <div v-if="repos.length > 0" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div v-if="mostStarredRepo" class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-          <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Most Starred</p>
-          <a :href="mostStarredRepo.html_url" target="_blank" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline truncate block">
-            {{ mostStarredRepo.name }}
-          </a>
-          <p class="text-xs text-gray-400 mt-1">★ {{ mostStarredRepo.stargazers_count }}</p>
+        <div v-if="mostStarredRepo" class="p-4 rounded-[var(--radius-md)] bg-white border border-white">
+          <p class="text-[11px] tracking-[0.12em] uppercase text-black/40 mb-2">Most starred</p>
+          <a :href="mostStarredRepo.html_url" target="_blank" class="text-sm font-medium text-black hover:underline truncate block">{{ mostStarredRepo.name }}</a>
+          <p class="text-xs text-black/50 mt-1">★ {{ mostStarredRepo.stargazers_count }}</p>
         </div>
-        <div v-if="mostForkedRepo" class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-          <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Most Forked</p>
-          <a :href="mostForkedRepo.html_url" target="_blank" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline truncate block">
-            {{ mostForkedRepo.name }}
-          </a>
-          <p class="text-xs text-gray-400 mt-1">{{ mostForkedRepo.forks_count }} forks</p>
+        <div v-if="mostForkedRepo" class="p-4 rounded-[var(--radius-md)] bg-white/[0.04] border border-white/10">
+          <p class="text-[11px] tracking-[0.12em] uppercase text-white/30 mb-2">Most forked</p>
+          <a :href="mostForkedRepo.html_url" target="_blank" class="text-sm font-medium text-white hover:underline truncate block">{{ mostForkedRepo.name }}</a>
+          <p class="text-xs text-white/40 mt-1">{{ mostForkedRepo.forks_count }} forks</p>
         </div>
-        <div v-if="recentlyUpdatedRepo" class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-          <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Recently Updated</p>
-          <a :href="recentlyUpdatedRepo.html_url" target="_blank" class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline truncate block">
-            {{ recentlyUpdatedRepo.name }}
-          </a>
-          <p class="text-xs text-gray-400 mt-1">{{ new Date(recentlyUpdatedRepo.updated_at).toLocaleDateString() }}</p>
+        <div v-if="recentlyUpdatedRepo" class="p-4 rounded-[var(--radius-md)] bg-white/[0.04] border border-white/10">
+          <p class="text-[11px] tracking-[0.12em] uppercase text-white/30 mb-2">Recently updated</p>
+          <a :href="recentlyUpdatedRepo.html_url" target="_blank" class="text-sm font-medium text-white hover:underline truncate block">{{ recentlyUpdatedRepo.name }}</a>
+          <p class="text-xs text-white/40 mt-1">{{ new Date(recentlyUpdatedRepo.updated_at).toLocaleDateString() }}</p>
         </div>
       </div>
-      <div v-if="allTopics.length > 0" class="mt-4">
-        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Topics</p>
+      <div v-if="allTopics.length > 0" class="mt-6">
+        <p class="text-[11px] tracking-[0.12em] uppercase text-white/30 mb-3">Topics</p>
         <div class="flex flex-wrap gap-1.5">
-          <span v-for="topic in allTopics" :key="topic" class="px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs rounded-full">
-            {{ topic }}
-          </span>
+          <span v-for="topic in allTopics" :key="topic" class="px-3 py-1 bg-white text-black text-xs font-medium rounded-full">{{ topic }}</span>
         </div>
       </div>
-      <div v-if="programmingLanguages.length > 0" class="mt-4">
-        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Languages Used</p>
+      <div v-if="programmingLanguages.length > 0" class="mt-6">
+        <p class="text-[11px] tracking-[0.12em] uppercase text-white/30 mb-3">Languages used</p>
         <div class="flex flex-wrap gap-1.5">
-          <span v-for="lang in programmingLanguages" :key="lang" class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs rounded-full">
-            {{ lang }}
-          </span>
+          <span v-for="lang in programmingLanguages" :key="lang" class="px-3 py-1 bg-white/10 border border-white/10 text-white/70 text-xs rounded-full">{{ lang }}</span>
         </div>
       </div>
     </section>
@@ -307,15 +276,15 @@ watch(username, loadProfile)
     <!-- Candidate Score -->
     <CandidateScoreCard v-if="profile && repos.length > 0" :profile="profile" :repos="repos" />
 
-    <section>
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-lg font-semibold">Private Note</h2>
+    <section class="rounded-[var(--radius-lg)] border border-white/10 bg-white/[0.04] p-6 lg:p-8">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-headline text-white">Private note</h2>
         <button
           v-if="!showNoteEditor"
           @click="showNoteEditor = true"
-          class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+          class="text-sm font-medium px-4 py-2 rounded-full border border-white/15 text-white hover:bg-white hover:text-black transition-colors cursor-pointer"
         >
-          {{ notesStore.getNote(profile.login) ? 'Edit' : 'Add Note' }}
+          {{ notesStore.getNote(profile.login) ? 'Edit' : 'Add note' }}
         </button>
       </div>
       <div v-if="showNoteEditor">
@@ -325,40 +294,33 @@ watch(username, loadProfile)
           placeholder="Notes about this developer. Supports **bold**, *italic*, `code`, [links](url)..."
           :rows="6"
         />
-        <div class="mt-3 flex gap-2">
-          <button @click="saveNote" class="px-4 py-1.5 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700">
-            Save
-          </button>
-          <button @click="showNoteEditor = false" class="px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-800">
-            Cancel
-          </button>
+        <div class="mt-4 flex gap-2">
+          <button @click="saveNote" class="px-6 py-2.5 bg-white text-black rounded-full text-sm font-semibold hover:bg-white/90 cursor-pointer">Save</button>
+          <button @click="showNoteEditor = false" class="px-6 py-2.5 border border-white/15 rounded-full text-sm text-white/70 hover:text-white hover:bg-white/10 cursor-pointer">Cancel</button>
         </div>
       </div>
-      <div v-else-if="notesStore.getNote(profile.login)" class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-        <div class="flex items-center gap-2 mb-2 flex-wrap">
-          <span v-for="tag in noteTags" :key="tag" class="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs rounded-full">
-            {{ tag }}
-          </span>
+      <div v-else-if="notesStore.getNote(profile.login)" class="rounded-[var(--radius-md)] bg-[#0B1120] border border-white/10 p-4">
+        <div class="flex items-center gap-2 mb-3 flex-wrap">
+          <span v-for="tag in noteTags" :key="tag" class="px-2.5 py-1 bg-white text-black text-xs font-medium rounded-full">{{ tag }}</span>
         </div>
-        <div class="text-sm prose prose-sm dark:prose-invert max-w-none" v-html="renderedNote" />
+        <div class="text-sm prose prose-sm prose-invert max-w-none text-white/80" v-html="renderedNote" />
       </div>
-      <div v-else class="text-sm text-gray-400">No notes yet.</div>
+      <div v-else class="text-sm text-white/30 py-4">No notes yet — add context only you can see.</div>
     </section>
 
     <section v-if="repos.length > 0">
-      <h2 class="text-lg font-semibold mb-3">Top Repositories</h2>
+      <h2 class="text-headline text-white mb-6">Top repositories</h2>
       <div class="grid gap-3">
         <div
-          v-for="repo in repos.slice(0, 10)"
+          v-for="(repo, idx) in repos.slice(0, 10)"
           :key="repo.id"
-          class="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+          class="rounded-[var(--radius-lg)] border transition-colors"
+          :class="idx === 0 ? 'p-8 bg-white border-white' : 'p-5 bg-white/[0.04] border-white/10 hover:bg-white/[0.06] hover:border-white/15'"
         >
-          <a :href="repo.html_url" target="_blank" class="text-indigo-600 dark:text-indigo-400 font-medium hover:underline">
-            {{ repo.name }}
-          </a>
-          <p v-if="repo.description" class="text-sm text-gray-500 mt-1">{{ repo.description }}</p>
-          <div class="flex items-center gap-4 mt-2 text-xs text-gray-400">
-            <span v-if="repo.language">{{ repo.language }}</span>
+          <a :href="repo.html_url" target="_blank" class="font-medium hover:underline" :class="idx === 0 ? 'text-black text-lg' : 'text-white'">{{ repo.name }}</a>
+          <p v-if="repo.description" class="text-sm mt-1 line-clamp-2" :class="idx === 0 ? 'text-black/60' : 'text-white/50'">{{ repo.description }}</p>
+          <div class="flex items-center gap-4 mt-3 text-xs" :class="idx === 0 ? 'text-black/40' : 'text-white/30'">
+            <span v-if="repo.language" class="px-2 py-1 rounded-full border" :class="idx === 0 ? 'bg-black text-white border-black' : 'bg-white/10 border-white/10 text-white/60'">{{ repo.language }}</span>
             <span>★ {{ repo.stargazers_count }}</span>
             <span>{{ repo.forks_count }} forks</span>
           </div>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { FolderIcon, PencilIcon, ArrowDownTrayIcon, PlusIcon } from '@heroicons/vue/24/outline'
+import { FolderIcon, ArrowDownTrayIcon, PlusIcon } from '@heroicons/vue/24/outline'
 import SkeletonCard from './SkeletonCard.vue'
 import EmptyState from './EmptyState.vue'
 
@@ -38,12 +38,12 @@ const displayCollections = computed(() => props.collections.slice(0, 4))
 </script>
 
 <template>
-  <div class="bg-dash-surface rounded-xl border border-dash-border/60 p-5 min-h-[220px] flex flex-col">
+  <div class="bg-dash-card rounded-xl border border-dash-border p-5 min-h-[220px] flex flex-col">
     <div class="flex items-center gap-3 mb-4">
-      <div class="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
-        <FolderIcon class="w-5 h-5 text-amber-500" />
+      <div class="w-9 h-9 rounded-lg bg-dash-primary/10 flex items-center justify-center flex-shrink-0">
+        <FolderIcon class="w-5 h-5 text-dash-primary" />
       </div>
-      <h3 class="text-sm font-semibold text-dash-text">Collections</h3>
+      <h3 class="text-sm font-semibold text-dash-text-secondary">Collections</h3>
     </div>
 
     <div v-if="loading" class="flex-1">
@@ -51,7 +51,7 @@ const displayCollections = computed(() => props.collections.slice(0, 4))
     </div>
     <EmptyState
       v-else-if="collections.length === 0"
-      icon="📂"
+      iconName="folder"
       title="No Collections Yet"
       description="Create your first collection."
       :cta="{ label: 'Create Collection', route: '/collections' }"
@@ -64,12 +64,12 @@ const displayCollections = computed(() => props.collections.slice(0, 4))
         @click="router.push('/collections')"
       >
         <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-7 h-7 rounded-md bg-amber-500/10 flex items-center justify-center flex-shrink-0">
-            <FolderIcon class="w-3.5 h-3.5 text-amber-500" />
+          <div class="w-7 h-7 rounded-md bg-dash-primary/10 flex items-center justify-center flex-shrink-0">
+            <FolderIcon class="w-3.5 h-3.5 text-dash-primary" />
           </div>
           <div class="min-w-0">
             <p class="text-sm font-medium text-dash-text truncate">{{ col.name }}</p>
-            <p class="text-xs text-dash-muted">
+            <p class="text-xs text-dash-text-tertiary">
               {{ col.members?.length || 0 }} devs · {{ timeAgo(col.created_at) }}
             </p>
           </div>
@@ -77,14 +77,14 @@ const displayCollections = computed(() => props.collections.slice(0, 4))
         <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
           <button
             @click.stop="router.push('/collections')"
-            class="p-1.5 rounded-md text-dash-muted hover:text-dash-text hover:bg-dash-border/30 transition-all"
+            class="p-1.5 rounded-md text-dash-text-tertiary hover:text-dash-text hover:bg-dash-border/30 transition-all cursor-pointer"
             title="Open"
           >
-            <PencilIcon class="w-3.5 h-3.5" />
+            <PlusIcon class="w-3.5 h-3.5" />
           </button>
           <button
             @click.stop="router.push('/collections')"
-            class="p-1.5 rounded-md text-dash-muted hover:text-dash-text hover:bg-dash-border/30 transition-all"
+            class="p-1.5 rounded-md text-dash-text-tertiary hover:text-dash-text hover:bg-dash-border/30 transition-all cursor-pointer"
             title="Export"
           >
             <ArrowDownTrayIcon class="w-3.5 h-3.5" />
@@ -97,7 +97,7 @@ const displayCollections = computed(() => props.collections.slice(0, 4))
     <router-link
       v-if="collections.length > 0"
       to="/collections"
-      class="mt-3 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-amber-600 bg-amber-500/10 rounded-lg hover:bg-amber-500/20 transition-all duration-150 flex-shrink-0"
+      class="mt-3 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-dash-text-secondary border border-dash-border rounded-lg hover:bg-dash-border/20 transition-all duration-150 flex-shrink-0 cursor-pointer"
     >
       <PlusIcon class="w-3.5 h-3.5" />
       View All Collections

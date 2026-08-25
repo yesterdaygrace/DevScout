@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FunctionalComponent } from 'vue'
 import { onMounted, ref, watch } from 'vue'
-import { MagnifyingGlassIcon, FolderIcon, BookmarkIcon, UserGroupIcon } from '@heroicons/vue/24/outline'
+import { MagnifyingGlassIcon, FolderIcon, UserGroupIcon, BookmarkIcon } from '@heroicons/vue/24/outline'
 import SkeletonCard from './SkeletonCard.vue'
 
 interface Metric {
@@ -34,7 +34,6 @@ function getIcon(name: string): FunctionalComponent {
   return iconMap[name] || MagnifyingGlassIcon
 }
 
-// Counter animation
 const animatedValues = ref<number[]>([])
 
 function animateCounters() {
@@ -68,58 +67,46 @@ watch(() => props.metrics, (newVal) => {
 </script>
 
 <template>
-  <div v-if="loading" class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+  <div v-if="loading" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
     <SkeletonCard v-for="n in 4" :key="n" type="card" :count="1" />
   </div>
-  <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+  <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-4">
     <router-link
       v-for="(metric, idx) in metrics"
       :key="metric.title"
       :to="metric.link"
-      class="group relative bg-dash-surface rounded-xl border border-dash-border/60 p-5 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 flex flex-col min-h-[140px]"
-      :class="{
-        'hover:border-indigo-400/40 hover:shadow-indigo-500/5': metric.color === 'indigo',
-        'hover:border-emerald-400/40 hover:shadow-emerald-500/5': metric.color === 'emerald',
-        'hover:border-amber-400/40 hover:shadow-amber-500/5': metric.color === 'amber',
-        'hover:border-violet-400/40 hover:shadow-violet-500/5': metric.color === 'violet',
-      }"
+      class="group relative rounded-[var(--radius-lg)] p-6 flex flex-col transition-colors cursor-pointer overflow-hidden col-span-1 bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.10] min-h-[180px]"
     >
-      <!-- Icon + Title row -->
-      <div class="flex items-center gap-3 mb-3">
-        <div
-          class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-150"
-          :class="{
-            'bg-indigo-500/10 text-indigo-500 group-hover:bg-indigo-500/15': metric.color === 'indigo',
-            'bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500/15': metric.color === 'emerald',
-            'bg-amber-500/10 text-amber-500 group-hover:bg-amber-500/15': metric.color === 'amber',
-            'bg-violet-500/10 text-violet-500 group-hover:bg-violet-500/15': metric.color === 'violet',
-          }"
-        >
-          <component :is="getIcon(metric.icon)" class="w-5 h-5" />
-        </div>
-        <p class="text-xs font-semibold text-dash-muted uppercase tracking-wide">
+      <!-- Label -->
+      <div class="flex items-center justify-between">
+        <p class="text-[11px] font-semibold tracking-[0.14em] uppercase text-white/30">
           {{ metric.title }}
         </p>
+        <div class="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center">
+          <component :is="getIcon(metric.icon)" class="w-4 h-4 text-white/40" />
+        </div>
       </div>
 
-      <!-- Value - metric dominates -->
-      <p class="text-[34px] sm:text-[40px] font-bold text-dash-text tabular-nums tracking-tight leading-none mt-auto">
+      <!-- Value -->
+      <p
+        class="font-bold tabular-nums tracking-[-0.04em] leading-none mt-auto text-white text-[36px]"
+      >
         {{ animatedValues[idx] ?? metric.value }}
       </p>
 
-      <!-- Trend and Secondary -->
+      <!-- Secondary -->
       <div class="flex items-center gap-2 mt-2">
         <span
           v-if="metric.trend !== null"
-          class="inline-flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded-full"
-          :class="metric.trend >= 0 ? 'text-emerald-400 bg-emerald-500/10' : 'text-red-400 bg-red-500/10'"
+          class="inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full"
+          :class="metric.trend >= 0 ? 'bg-emerald-500/15 text-emerald-300' : 'bg-red-500/15 text-red-300'"
         >
-          <svg v-if="metric.trend >= 0" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-          <svg v-else class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-          {{ Math.abs(metric.trend) }}%
+          {{ metric.trend >= 0 ? '↑' : '↓' }} {{ Math.abs(metric.trend) }}%
         </span>
-        <span class="text-xs text-dash-muted/70">{{ metric.secondary }}</span>
+        <span class="text-xs text-white/40">{{ metric.secondary }}</span>
       </div>
+
+
     </router-link>
   </div>
 </template>

@@ -47,13 +47,13 @@ const chartData = computed(() => ({
   datasets: [{
     label: 'Searches',
     data: filteredDaily.value.map(d => d.count),
-    borderColor: '#14B8A6',
-    backgroundColor: 'rgba(20, 184, 166, 0.08)',
+    borderColor: '#6366F1',
+    backgroundColor: 'rgba(99, 102, 245, 0.08)',
     fill: true,
     tension: 0.35,
     pointRadius: 2,
     pointHoverRadius: 5,
-    pointBackgroundColor: '#14B8A6',
+    pointBackgroundColor: '#6366F1',
     borderWidth: 2,
   }],
 }))
@@ -77,7 +77,7 @@ const chartOptions = {
   scales: {
     y: {
       beginAtZero: true,
-      ticks: { stepSize: 1, color: '#64748b', font: { size: 11 } },
+      ticks: { stepSize: 1, color: '#94A3B8', font: { size: 11 } },
       grid: { color: 'rgba(148, 163, 184, 0.08)' },
     },
     x: {
@@ -91,21 +91,21 @@ const filters = [
   { key: 'today' as const, label: 'Today' },
   { key: '7d' as const, label: '7 Days' },
   { key: '30d' as const, label: '30 Days' },
-  { key: 'all' as const, label: 'Custom' },
+  { key: 'all' as const, label: 'All Time' },
 ]
 </script>
 
 <template>
-  <div class="bg-dash-surface rounded-xl border border-dash-border/60 p-5 min-h-[320px] flex flex-col">
+  <div class="bg-dash-card rounded-xl border border-dash-border p-5 min-h-[320px] flex flex-col">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-sm font-semibold text-dash-text">Search Analytics</h3>
+      <h3 class="text-sm font-semibold text-dash-text-secondary">Search Analytics</h3>
       <div class="flex gap-1">
         <button
           v-for="f in filters"
           :key="f.key"
           @click="dateFilter = f.key"
-          class="px-2.5 py-1 text-xs rounded-md transition-all duration-150"
-          :class="dateFilter === f.key ? 'bg-teal-500 text-white' : 'text-dash-muted hover:text-dash-text hover:bg-dash-border/30'"
+          class="px-2.5 py-1 text-xs rounded-md transition-all duration-150 cursor-pointer"
+          :class="dateFilter === f.key ? 'bg-dash-primary text-white' : 'text-dash-text-tertiary hover:text-dash-text-secondary hover:bg-dash-border/30'"
         >
           {{ f.label }}
         </button>
@@ -116,7 +116,13 @@ const filters = [
       <SkeletonCard type="chart" />
     </div>
     <div v-else-if="!data || filteredDaily.length === 0" class="flex-1 flex items-center justify-center">
-      <EmptyState icon="📊" title="No search data yet" description="Start searching to see analytics" :cta="null" />
+      <div class="text-center">
+        <div class="w-12 h-12 rounded-xl bg-dash-border/10 flex items-center justify-center mx-auto mb-3">
+          <svg class="w-5 h-5 text-dash-text-tertiary" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-3 6h-2.25m-4.5 0H7.5" /></svg>
+        </div>
+        <p class="text-sm text-dash-text-tertiary">No search data yet</p>
+        <p class="text-xs text-dash-text-tertiary/60 mt-1">Start searching to see analytics</p>
+      </div>
     </div>
     <template v-else>
       <div class="flex-1 min-h-0">
@@ -124,16 +130,16 @@ const filters = [
       </div>
       <div class="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-dash-border flex-shrink-0">
         <div class="text-center">
-          <p class="text-lg font-bold text-dash-text tabular-nums">{{ data.total }}</p>
-          <p class="text-[11px] text-dash-muted">Total Searches</p>
+          <p class="text-lg font-bold text-dash-text-secondary tabular-nums">{{ data.total }}</p>
+          <p class="text-[11px] text-dash-text-tertiary">Total Searches</p>
         </div>
         <div class="text-center">
-          <p class="text-lg font-bold text-dash-text tabular-nums">{{ data.unique }}</p>
-          <p class="text-[11px] text-dash-muted">Unique Queries</p>
+          <p class="text-lg font-bold text-dash-text-secondary tabular-nums">{{ data.unique }}</p>
+          <p class="text-[11px] text-dash-text-tertiary">Unique Queries</p>
         </div>
         <div class="text-center">
-          <p class="text-lg font-bold text-teal-500 tabular-nums">{{ data.today }}</p>
-          <p class="text-[11px] text-dash-muted">Today</p>
+          <p class="text-lg font-bold text-dash-primary tabular-nums">{{ data.today }}</p>
+          <p class="text-[11px] text-dash-text-tertiary">Today</p>
         </div>
       </div>
     </template>

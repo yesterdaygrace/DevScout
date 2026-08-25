@@ -2,7 +2,7 @@
 import { computed, ref, onMounted } from 'vue'
 import type { GitHubUser, GitHubRepo } from '../types/github'
 import { useCandidateScore } from '../composables/useCandidateScore'
-import { ChevronDownIcon, ChevronUpIcon, TrophyIcon } from '@heroicons/vue/24/outline'
+import { ChevronDownIcon, ChevronUpIcon, TrophyIcon, CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/vue/24/outline'
 
 interface Props {
   profile: GitHubUser
@@ -28,7 +28,6 @@ onMounted(() => {
   function animate(now: number) {
     const elapsed = now - start
     const progress = Math.min(elapsed / duration, 1)
-    // Ease out cubic
     const eased = 1 - Math.pow(1 - progress, 3)
     animatedScore.value = Math.round(eased * target)
     if (progress < 1) requestAnimationFrame(animate)
@@ -45,9 +44,9 @@ const strokeDashoffset = computed(() => {
 })
 
 function getProgressBarColor(score: number): string {
-  if (score >= 70) return 'bg-green-500'
-  if (score >= 40) return 'bg-yellow-500'
-  return 'bg-red-500'
+  if (score >= 70) return 'bg-dash-success'
+  if (score >= 40) return 'bg-dash-warning'
+  return 'bg-dash-danger'
 }
 
 const gaugeColor = computed(() => {
@@ -58,18 +57,18 @@ const gaugeColor = computed(() => {
 </script>
 
 <template>
-  <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6">
+  <div class="bg-dash-card rounded-xl border border-dash-border p-6 space-y-6">
     <!-- Header -->
     <div class="flex items-center justify-between">
-      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Candidate Score</h2>
-      <span v-if="scoreResult.total > 70" class="flex items-center gap-1 text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full">
+      <h2 class="text-xl font-semibold text-dash-text">Candidate Score</h2>
+      <span v-if="scoreResult.total > 70" class="flex items-center gap-1 text-xs bg-dash-success/10 text-dash-success px-2 py-0.5 rounded-full">
         <TrophyIcon class="w-3 h-3" />
         Top Candidate
       </span>
     </div>
 
     <!-- Overall Score Gauge -->
-    <div class="flex flex-col md:flex-row gap-6 items-center md:items-start">
+    <div class="flex flex-col md:flex-row gap-8 items-center md:items-start">
       <!-- Circular Gauge -->
       <div class="flex flex-col items-center">
         <div class="relative w-32 h-32">
@@ -78,7 +77,7 @@ const gaugeColor = computed(() => {
             <circle
               cx="64" cy="64" :r="radius"
               stroke="currentColor" stroke-width="8" fill="none"
-              class="text-gray-200 dark:text-gray-700"
+              class="text-dash-border/30"
             />
             <!-- Progress circle -->
             <circle
@@ -99,7 +98,7 @@ const gaugeColor = computed(() => {
             >
               {{ animatedScore }}
             </span>
-            <span class="text-xs text-gray-500 dark:text-gray-400">/ 100</span>
+            <span class="text-xs text-dash-text-tertiary">/ 100</span>
           </div>
         </div>
         <span :class="['mt-2 text-sm font-semibold', scoreResult.rankColor]">{{ scoreResult.rank }}</span>
@@ -109,13 +108,13 @@ const gaugeColor = computed(() => {
       <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
         <!-- Strengths -->
         <div v-if="scoreResult.strengths.length > 0" class="space-y-2">
-          <h3 class="text-sm font-semibold text-green-600 dark:text-green-400 flex items-center gap-1">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <h3 class="text-sm font-semibold text-dash-success flex items-center gap-1">
+            <CheckCircleIcon class="w-4 h-4" />
             Strengths
           </h3>
-          <ul class="space-y-1.5 text-sm text-gray-700 dark:text-gray-300">
+          <ul class="space-y-1.5 text-sm text-dash-text-secondary">
             <li v-for="strength in scoreResult.strengths" :key="strength" class="flex items-start gap-2">
-              <span class="text-green-500 mt-0.5 shrink-0">✓</span>
+              <CheckCircleIcon class="w-4 h-4 text-dash-success mt-0.5 shrink-0" />
               <span>{{ strength }}</span>
             </li>
           </ul>
@@ -123,20 +122,20 @@ const gaugeColor = computed(() => {
 
         <!-- Weaknesses -->
         <div v-if="scoreResult.weaknesses.length > 0" class="space-y-2">
-          <h3 class="text-sm font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+          <h3 class="text-sm font-semibold text-dash-warning flex items-center gap-1">
+            <ExclamationCircleIcon class="w-4 h-4" />
             Areas for Growth
           </h3>
-          <ul class="space-y-1.5 text-sm text-gray-700 dark:text-gray-300">
+          <ul class="space-y-1.5 text-sm text-dash-text-secondary">
             <li v-for="weakness in scoreResult.weaknesses" :key="weakness" class="flex items-start gap-2">
-              <span class="text-amber-500 mt-0.5 shrink-0">△</span>
+              <ExclamationCircleIcon class="w-4 h-4 text-dash-warning mt-0.5 shrink-0" />
               <span>{{ weakness }}</span>
             </li>
           </ul>
         </div>
 
         <!-- Empty state -->
-        <div v-if="scoreResult.strengths.length === 0 && scoreResult.weaknesses.length === 0" class="col-span-2 text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+        <div v-if="scoreResult.strengths.length === 0 && scoreResult.weaknesses.length === 0" class="col-span-2 text-sm text-dash-text-tertiary text-center py-4">
           Balanced profile across all factors — consistent performer
         </div>
       </div>
@@ -145,7 +144,7 @@ const gaugeColor = computed(() => {
     <!-- Toggle Details Button -->
     <button
       @click="showDetails = !showDetails"
-      class="flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+      class="flex items-center gap-2 text-sm font-medium text-dash-primary hover:text-dash-primary-hover transition-colors cursor-pointer"
       :aria-expanded="showDetails"
       aria-controls="score-details"
     >
@@ -158,9 +157,9 @@ const gaugeColor = computed(() => {
     <div
       v-if="showDetails"
       id="score-details"
-      class="space-y-4 pt-2 border-t border-gray-200 dark:border-gray-700"
+      class="space-y-4 pt-2 border-t border-dash-border"
     >
-      <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Score Breakdown</h3>
+      <h3 class="text-sm font-semibold text-dash-text">Score Breakdown</h3>
       <div class="space-y-4">
         <div
           v-for="factor in scoreResult.factors"
@@ -169,10 +168,10 @@ const gaugeColor = computed(() => {
         >
           <!-- Factor header -->
           <div class="flex items-center justify-between text-sm">
-            <span class="font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+            <span class="font-medium text-dash-text-secondary flex items-center gap-1.5">
               <span>{{ factor.icon }}</span>
               {{ factor.name }}
-              <span class="text-xs text-gray-500 dark:text-gray-400">({{ Math.round(factor.weight * 100) }}%)</span>
+              <span class="text-xs text-dash-text-tertiary">({{ Math.round(factor.weight * 100) }}%)</span>
             </span>
             <span :class="['font-semibold', getScoreColor(factor.score)]">
               {{ factor.score }}
@@ -180,7 +179,7 @@ const gaugeColor = computed(() => {
           </div>
 
           <!-- Progress bar -->
-          <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+          <div class="w-full bg-dash-border/20 rounded-full h-2 overflow-hidden">
             <div
               :class="['h-2 rounded-full transition-all duration-700 ease-out', getProgressBarColor(factor.score)]"
               :style="{ width: `${factor.score}%` }"
@@ -194,7 +193,7 @@ const gaugeColor = computed(() => {
 
           <!-- Description + Detail -->
           <div class="flex items-start justify-between">
-            <p class="text-xs text-gray-500 dark:text-gray-400 flex-1">{{ factor.description }}</p>
+            <p class="text-xs text-dash-text-tertiary flex-1">{{ factor.description }}</p>
             <span v-if="factor.detail" class="text-xs ml-2 shrink-0" :class="getScoreColor(factor.score)">
               {{ factor.detail }}
             </span>
@@ -202,9 +201,9 @@ const gaugeColor = computed(() => {
         </div>
 
         <!-- Weight summary -->
-        <div class="pt-2 border-t border-gray-100 dark:border-gray-700/50">
-          <p class="text-xs text-gray-400 dark:text-gray-500 text-center">
-            Weighted score: {{ scoreResult.total }}/100 ·
+        <div class="pt-2 border-t border-dash-border/30">
+          <p class="text-xs text-dash-text-tertiary text-center">
+            Weighted score: {{ scoreResult.total }}/100 &middot;
             <span v-for="(f, i) in scoreResult.factors" :key="f.name">
               {{ f.name }} {{ Math.round(f.weight * 100) }}%{{ i < scoreResult.factors.length - 1 ? ' + ' : '' }}
             </span>

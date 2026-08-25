@@ -3,29 +3,113 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-dash-bg: #0F172A;
-  --color-dash-surface: #1E293B;
-  --color-dash-border: #334155;
+  --color-dash-bg: #0B1120;
+  --color-dash-surface: #111B2F;
+  --color-dash-card: #16213A;
+  --color-dash-border: #1E2D4A;
   --color-dash-primary: #6366F1;
-  --color-dash-primary-hover: #5558E6;
+  --color-dash-primary-hover: #4F46E5;
   --color-dash-success: #22C55E;
   --color-dash-warning: #F59E0B;
   --color-dash-danger: #EF4444;
-  --color-dash-text: #F8FAFC;
-  --color-dash-muted: #94A3B8;
+  --color-dash-text: #F1F5F9;
+  --color-dash-text-secondary: #94A3B8;
+  --color-dash-text-tertiary: #64748B;
+  --color-dash-muted: #334155;
   --color-dash-hover: #1E3A5F;
+
+  --space-section: 112px;
+  --space-group: 64px;
+  --space-element: 24px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
 }
 
-/* Page transition */
+/* Premium font stack: Space Grotesk for display, Work Sans for body */
+@layer base {
+  html {
+    font-family: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-dash-bg text-dash-text;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Typographic tokens — premium scale (mobile-first) */
+.text-hero {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.9;
+  font-size: 40px;
+}
+@media (min-width: 768px) {
+  .text-hero { font-size: 64px; }
+}
+@media (min-width: 1024px) {
+  .text-hero { font-size: 80px; }
+}
+
+.text-section {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  font-size: 28px;
+}
+@media (min-width: 768px) {
+  .text-section { font-size: 40px; }
+}
+
+.text-headline {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  font-size: 20px;
+}
+@media (min-width: 768px) {
+  .text-headline { font-size: 24px; }
+}
+
+.text-subhead {
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 400;
+}
+@media (min-width: 768px) {
+  .text-subhead { font-size: 20px; }
+}
+
+/* Page transition — restrained */
 .page-enter-active,
 .page-leave-active {
-  transition: opacity 150ms ease, transform 150ms ease;
+  transition: opacity 200ms ease;
 }
-.page-enter-from {
-  opacity: 0;
-  transform: translateY(6px);
-}
+.page-enter-from,
 .page-leave-to {
   opacity: 0;
-  transform: translateY(-6px);
 }
+
+/* Focus ring — premium subtle */
+*:focus-visible {
+  outline: 2px solid #6366F1;
+  outline-offset: 2px;
+}
+
+/* Scrollbar — minimal */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #1E2D4A; border-radius: 999px; }
+::-webkit-scrollbar-track { background: transparent; }

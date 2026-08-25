@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { ClockIcon, ArrowsRightLeftIcon, DocumentTextIcon, FolderIcon } from '@heroicons/vue/24/outline'
+import { ClockIcon, PlusCircleIcon, EyeIcon } from '@heroicons/vue/24/outline'
 import SkeletonCard from './SkeletonCard.vue'
 import EmptyState from './EmptyState.vue'
 
@@ -34,12 +34,12 @@ const displayItems = computed(() => props.items.slice(0, 5))
 </script>
 
 <template>
-  <div class="bg-dash-surface rounded-xl border border-dash-border/60 p-5 min-h-[220px] flex flex-col">
+  <div class="bg-dash-card rounded-xl border border-dash-border p-5 min-h-[220px] flex flex-col">
     <div class="flex items-center gap-3 mb-4">
-      <div class="w-9 h-9 rounded-lg bg-sky-500/10 flex items-center justify-center flex-shrink-0">
-        <ClockIcon class="w-5 h-5 text-sky-500" />
+      <div class="w-9 h-9 rounded-lg bg-dash-primary/10 flex items-center justify-center flex-shrink-0">
+        <EyeIcon class="w-5 h-5 text-dash-primary" />
       </div>
-      <h3 class="text-sm font-semibold text-dash-text">Recently Viewed</h3>
+      <h3 class="text-sm font-semibold text-dash-text-secondary">Recently Viewed</h3>
     </div>
 
     <div v-if="loading" class="flex-1">
@@ -47,7 +47,7 @@ const displayItems = computed(() => props.items.slice(0, 5))
     </div>
     <EmptyState
       v-else-if="items.length === 0"
-      icon="👁️"
+      iconName="eye"
       title="No Profiles Viewed Yet"
       description="Start searching to find developers."
       :cta="{ label: 'Search developers', route: '/search' }"
@@ -60,35 +60,28 @@ const displayItems = computed(() => props.items.slice(0, 5))
         @click="router.push(`/profile/${item.github_username}`)"
       >
         <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-7 h-7 rounded-full bg-sky-500/20 flex items-center justify-center text-[11px] font-bold text-sky-500 flex-shrink-0 uppercase">
+          <div class="w-7 h-7 rounded-full bg-dash-primary/20 flex items-center justify-center text-[11px] font-bold text-dash-primary flex-shrink-0 uppercase">
             {{ item.github_username.charAt(0) }}
           </div>
           <div class="min-w-0">
             <p class="text-sm font-medium text-dash-text truncate">{{ item.github_username }}</p>
-            <p class="text-xs text-dash-muted">{{ timeAgo(item.viewed_at) }}</p>
+            <p class="text-xs text-dash-text-tertiary">{{ timeAgo(item.viewed_at) }}</p>
           </div>
         </div>
         <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
           <button
             @click.stop="router.push(`/compare?add=${item.github_username}`)"
-            class="p-1 rounded-md text-dash-muted hover:text-dash-text hover:bg-dash-border/30 transition-all"
+            class="p-1 rounded-md text-dash-text-tertiary hover:text-dash-text hover:bg-dash-border/30 transition-all cursor-pointer"
             title="Compare"
           >
-            <ArrowsRightLeftIcon class="w-3.5 h-3.5" />
-          </button>
-          <button
-            @click.stop="router.push(`/notes-search?q=${item.github_username}`)"
-            class="p-1 rounded-md text-dash-muted hover:text-dash-text hover:bg-dash-border/30 transition-all"
-            title="Notes"
-          >
-            <DocumentTextIcon class="w-3.5 h-3.5" />
+            <EyeIcon class="w-3.5 h-3.5" />
           </button>
           <button
             @click.stop="router.push('/collections')"
-            class="p-1 rounded-md text-dash-muted hover:text-dash-text hover:bg-dash-border/30 transition-all"
+            class="p-1 rounded-md text-dash-text-tertiary hover:text-dash-text hover:bg-dash-border/30 transition-all cursor-pointer"
             title="Collection"
           >
-            <FolderIcon class="w-3.5 h-3.5" />
+            <ClockIcon class="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
@@ -98,8 +91,9 @@ const displayItems = computed(() => props.items.slice(0, 5))
     <router-link
       v-if="items.length > 0"
       to="/search"
-      class="mt-3 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-sky-600 bg-sky-500/10 rounded-lg hover:bg-sky-500/20 transition-all duration-150 flex-shrink-0"
+      class="mt-3 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-dash-text-secondary border border-dash-border rounded-lg hover:bg-dash-border/20 transition-all duration-150 flex-shrink-0 cursor-pointer"
     >
+      <PlusCircleIcon class="w-3.5 h-3.5" />
       Search More Developers
     </router-link>
   </div>
