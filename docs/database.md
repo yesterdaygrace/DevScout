@@ -224,56 +224,56 @@ erDiagram
     }
 
     profiles {
-        uuid id PK_FK
-        text email
-        text display_name
-        timestamp created_at
+        uuid id PK
+        string email
+        string display_name
+        datetime created_at
     }
 
     shortlist {
         uuid id PK
         uuid user_id FK
-        text github_username
-        timestamp created_at
+        string github_username
+        datetime created_at
     }
 
     notes {
         uuid id PK
         uuid user_id FK
-        text github_username
-        text content
-        textArray tags
-        timestamp created_at
-        timestamp updated_at
+        string github_username
+        string content
+        string tags
+        datetime created_at
+        datetime updated_at
     }
 
     recently_viewed {
         uuid id PK
         uuid user_id FK
-        text github_username
-        timestamp viewed_at
+        string github_username
+        datetime viewed_at
     }
 
     saved_searches {
         uuid id PK
         uuid user_id FK
-        text query
-        jsonb filters
-        timestamp created_at
+        string query
+        string filters
+        datetime created_at
     }
 
     collections {
         uuid id PK
         uuid user_id FK
-        text name
-        timestamp created_at
+        string name
+        datetime created_at
     }
 
     collection_members {
         uuid id PK
         uuid collection_id FK
-        text github_username
-        timestamp created_at
+        string github_username
+        datetime created_at
     }
 ```
 
