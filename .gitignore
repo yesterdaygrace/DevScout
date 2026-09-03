@@ -1,3 +1,20 @@
+# Environment - NEVER commit real secrets
+.env
+.env.*
+!.env.example
+!.env.template
+
+# Secrets / keys
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+*service-account*.json
+secrets/
+.aws/
+.gcp/
+
 # Logs
 logs
 *.log
@@ -17,6 +34,7 @@ dist-ssr
 !.vscode/extensions.json
 .idea
 .DS_Store
+**/.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
@@ -30,9 +48,25 @@ coverage/
 
 # Vercel
 .vercel
+.netlify
 
-# Orca / OMO
+# Orca / OMO / Code Intelligence
+.omo
 .omo/
+.codegraph
+.codegraph/
+.playwright-mcp
+.playwright-mcp/
+.claude/
+.cursor/
+.ruff_cache/
+.cache/
+
+# Temp / cache
+tmp/
+temp/
+*.tmp
+*.temp
 
 # Lockfile duplicates (project uses npm)
 pnpm-lock.yaml
