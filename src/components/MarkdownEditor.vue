@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { marked } from 'marked'
+import { sanitizeHtml } from '../utils/sanitize'
 
 const props = defineProps<{
   modelValue: string
@@ -13,7 +15,7 @@ const emit = defineEmits<{
 
 const showPreview = ref(false)
 
-const tags = defineModel<string[]>('tags', { default: [] })
+const tags = defineModel<string[]>('tags', { default: () => [] })
 const newTag = ref('')
 
 function addTag() {
@@ -28,28 +30,10 @@ function removeTag(tag: string) {
   tags.value = tags.value.filter(t => t !== tag)
 }
 
-// Simple Markdown to HTML conversion
-function renderMarkdown(text: string): string {
-  if (!text) return '<p class="text-gray-400 italic">No content</p>'
-  
-  let html = text
-    // Code blocks
-    .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-gray-100 dark:bg-gray-700 p-3 rounded-lg overflow-x-auto text-sm my-2"><code>$2</code></pre>')
-    // Inline code
-    .replace(/`([^`]+)`/g, '<code class="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded text-sm">$1</code>')
-    // Bold
-    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-    // Italic
-    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-    // Links
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="text-indigo-500 hover:underline">$1</a>')
-    // Newlines to <br>
-    .replace(/\n/g, '<br />')
-  
-  return html
-}
-
-const previewHtml = computed(() => renderMarkdown(props.modelValue))
+const previewHtml = computed(() => {
+  if (!props.modelValue) return '<p class="text-gray-400 italic">No content</p>'
+  return sanitizeHtml(marked.parse(props.modelValue, { async: false }) as string)
+})
 </script>
 
 <template>

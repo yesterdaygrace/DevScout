@@ -71,6 +71,22 @@ export const useNotesStore = defineStore('notes', () => {
 
     const existing = notes.value.find(n => n.github_username === githubUsername)
     const action = existing ? 'update' : 'insert'
+
+    const usernameRegex = /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/
+    if (!githubUsername || !usernameRegex.test(githubUsername)) {
+      toast().error('Invalid GitHub username')
+      return
+    }
+
+    if (content.length > 50_000) {
+      toast().error('Note content exceeds maximum allowed length of 50,000 characters')
+      return
+    }
+    if (tags.length > 50) {
+      toast().error('Maximum 50 tags allowed per note')
+      return
+    }
+
     logger.info('NOTES', action, { githubUsername, contentLength: content.length, tags })
 
     let result

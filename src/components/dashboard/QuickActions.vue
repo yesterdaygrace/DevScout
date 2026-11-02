@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MagnifyingGlassIcon, FolderPlusIcon, ArrowsRightLeftIcon, DocumentPlusIcon, UserPlusIcon } from '@heroicons/vue/24/outline'
+import { MagnifyingGlassIcon, FolderPlusIcon, ArrowsRightLeftIcon, DocumentPlusIcon, UserPlusIcon, SparklesIcon } from '@heroicons/vue/24/outline'
 import { useRouter } from 'vue-router'
 
 const emit = defineEmits<{
@@ -12,6 +12,7 @@ const actions = [
   { id: 'search', label: 'Search Developer', icon: MagnifyingGlassIcon },
   { id: 'collection', label: 'Create Collection', icon: FolderPlusIcon },
   { id: 'compare', label: 'Compare Developers', icon: ArrowsRightLeftIcon },
+  { id: 'seed', label: 'Seed 100 Talent Searches', icon: SparklesIcon },
   { id: 'note', label: 'Create Note', icon: DocumentPlusIcon },
   { id: 'import', label: 'Import Username', icon: UserPlusIcon },
 ]

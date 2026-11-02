@@ -68,32 +68,44 @@ export const useCollectionsStore = defineStore('collections', () => {
   }
 
   async function create(name: string) {
+    const trimmed = name.trim()
+    if (!trimmed || trimmed.length > 100) {
+      toast().error('Collection name must be between 1 and 100 characters')
+      return
+    }
+
     const auth = useAuthStore()
     if (!auth.user) { logger.warn('COLLECTIONS', 'create skipped — no user'); return }
 
-    logger.info('COLLECTIONS', 'create', { name })
+    logger.info('COLLECTIONS', 'create', { name: trimmed })
     const { error } = await supabase
       .from('collections')
-      .insert({ user_id: auth.user.id, name })
+      .insert({ user_id: auth.user.id, name: trimmed })
     
     if (error) {
-      logger.error('COLLECTIONS', 'create failed', error, { name })
-      toast().error(`Failed to create collection "${name}"`)
+      logger.error('COLLECTIONS', 'create failed', error, { name: trimmed })
+      toast().error(`Failed to create collection "${trimmed}"`)
       return
     }
     
-    toast().success(`Collection "${name}" created`)
+    toast().success(`Collection "${trimmed}" created`)
     await fetch()
   }
 
   async function rename(id: string, name: string) {
+    const trimmed = name.trim()
+    if (!trimmed || trimmed.length > 100) {
+      toast().error('Collection name must be between 1 and 100 characters')
+      return
+    }
+
     const auth = useAuthStore()
     if (!auth.user) { logger.warn('COLLECTIONS', 'rename skipped — no user'); return }
 
-    logger.info('COLLECTIONS', 'rename', { id, name })
+    logger.info('COLLECTIONS', 'rename', { id, name: trimmed })
     const { error } = await supabase
       .from('collections')
-      .update({ name })
+      .update({ name: trimmed })
       .eq('id', id)
       .eq('user_id', auth.user.id)
     

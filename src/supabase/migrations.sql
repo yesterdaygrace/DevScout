@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS profiles (
 CREATE TABLE IF NOT EXISTS shortlist (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  github_username TEXT NOT NULL,
+  github_username TEXT NOT NULL CHECK (length(github_username) <= 39),
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS shortlist (
 CREATE TABLE IF NOT EXISTS notes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  github_username TEXT NOT NULL,
-  content TEXT NOT NULL,
+  github_username TEXT NOT NULL CHECK (length(github_username) <= 39),
+  content TEXT NOT NULL CHECK (length(content) <= 50000),
   tags TEXT[] DEFAULT '{}',
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS notes (
 CREATE TABLE IF NOT EXISTS recently_viewed (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  github_username TEXT NOT NULL,
+  github_username TEXT NOT NULL CHECK (length(github_username) <= 39),
   viewed_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS recently_viewed (
 CREATE TABLE IF NOT EXISTS saved_searches (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  query TEXT NOT NULL,
+  query TEXT NOT NULL CHECK (length(query) <= 256),
   filters JSONB DEFAULT '{}',
   created_at TIMESTAMP DEFAULT NOW()
 );
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS saved_searches (
 CREATE TABLE IF NOT EXISTS collections (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
+  name TEXT NOT NULL CHECK (length(name) <= 100),
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS collections (
 CREATE TABLE IF NOT EXISTS collection_members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   collection_id UUID NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
-  github_username TEXT NOT NULL,
+  github_username TEXT NOT NULL CHECK (length(github_username) <= 39),
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -86,6 +86,7 @@ DROP POLICY IF EXISTS "Users can delete own notes" ON notes;
 
 DROP POLICY IF EXISTS "Users can read own recently_viewed" ON recently_viewed;
 DROP POLICY IF EXISTS "Users can insert own recently_viewed" ON recently_viewed;
+DROP POLICY IF EXISTS "Users can delete own recently_viewed" ON recently_viewed;
 
 DROP POLICY IF EXISTS "Users can read own saved_searches" ON saved_searches;
 DROP POLICY IF EXISTS "Users can insert own saved_searches" ON saved_searches;
@@ -107,7 +108,8 @@ CREATE POLICY "Users can read own profile"
 
 CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE
-  USING (auth.uid() = id);
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
 
 -- Shortlist: users can CRUD their own entries
 CREATE POLICY "Users can read own shortlist"
@@ -147,6 +149,10 @@ CREATE POLICY "Users can read own recently_viewed"
 CREATE POLICY "Users can insert own recently_viewed"
   ON recently_viewed FOR INSERT
   WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own recently_viewed"
+  ON recently_viewed FOR DELETE
+  USING (auth.uid() = user_id);
 
 -- Saved Searches: users can read/insert/delete their own
 CREATE POLICY "Users can read own saved_searches"
@@ -217,6 +223,7 @@ CREATE FUNCTION handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, auth
 AS $$
 BEGIN
   INSERT INTO public.profiles (id, email, display_name)
@@ -233,3 +240,10 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION handle_new_user();
+
+-- Unique indexes to prevent duplicate entries & database bloat
+CREATE UNIQUE INDEX IF NOT EXISTS idx_shortlist_user_username ON shortlist (user_id, github_username);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_notes_user_username ON notes (user_id, github_username);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_collections_user_name ON collections (user_id, name);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_collection_members_col_user ON collection_members (collection_id, github_username);
+

@@ -47,3 +47,77 @@ export interface SkillBreakdown {
   percentage: number
   bytes: number
 }
+
+export interface ContributionDay {
+  date: string
+  count: number
+  level: 0 | 1 | 2 | 3 | 4
+}
+
+export interface ContributionWeek {
+  days: ContributionDay[]
+}
+
+export interface ConsistencyStats {
+  activeWeeks: number
+  totalWeeks: number
+  activeWeeksRatio: number
+  currentStreak: number
+  longestStreak: number
+  tier: 'Exceptional' | 'Consistent' | 'Moderate' | 'Sporadic' | 'Dormant'
+}
+
+export interface PRSummaryItem {
+  id: number
+  title: string
+  repo: string
+  state: 'merged' | 'closed' | 'open'
+  url: string
+  createdAt: string
+  closedAt?: string | null
+  mergedAt?: string | null
+  isExternal: boolean
+}
+
+export interface PRStats {
+  total: number
+  merged: number
+  closed: number
+  open: number
+  mergeRate: number
+  recent: PRSummaryItem[]
+}
+
+export interface RepoContribution {
+  repo: string
+  owner: string
+  isExternal: boolean
+  description?: string | null
+  stargazersCount?: number
+  commitCount?: number
+  prCount?: number
+  lastActive?: string
+  url: string
+}
+
+export interface RecentProjectActivity {
+  repo: string
+  lastActive: string
+  commitCount: number
+  prCount: number
+  url: string
+}
+
+export interface DeveloperActivitySummary {
+  calendar: {
+    totalContributions: number
+    weeks: ContributionWeek[]
+  }
+  consistency: ConsistencyStats
+  pullRequests: PRStats
+  externalContributions: RepoContribution[]
+  ownedContributions: RepoContribution[]
+  recentProjects: RecentProjectActivity[]
+  hasPrivateActivityDisclaimer: boolean
+}
+

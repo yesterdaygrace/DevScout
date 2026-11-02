@@ -6,6 +6,7 @@ export {
   getUserRepos,
   getRepoLanguages,
   getSkillBreakdown,
+  getUserActivity,
   getGitHubToken,
   isUsingPAT,
   onRateLimitUpdate,

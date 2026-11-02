@@ -2,7 +2,7 @@ import { ref } from 'vue'
 import type { SearchHistoryItem } from '../types/search'
 
 const STORAGE_KEY = 'search_history'
-const MAX_HISTORY = 10
+export const MAX_HISTORY = 100
 let idCounter = 0
 
 const history = ref<SearchHistoryItem[]>([])
@@ -41,7 +41,7 @@ export function useSearchHistory() {
 
     const item: SearchHistoryItem = {
       id: generateId(),
-      query: query.trim(),
+      query: query.trim().slice(0, 256),
       filters,
       timestamp: new Date().toISOString(),
     }
@@ -75,5 +75,6 @@ export function useSearchHistory() {
     addToHistory,
     clearHistory,
     removeFromHistory,
+    reloadHistory: loadHistory,
   }
 }

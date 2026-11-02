@@ -36,11 +36,13 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, _from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+
   try {
     const { data } = await supabase.auth.getUser()
     const isAuthenticated = !!data.user
 
-    if (to.meta.requiresAuth && !isAuthenticated) {
+    if (requiresAuth && !isAuthenticated) {
       next('/login')
     } else if (to.path === '/login' && isAuthenticated) {
       next('/')
@@ -49,7 +51,7 @@ router.beforeEach(async (to, _from, next) => {
     }
   } catch {
     // Auth check failed (e.g. network error) — allow navigation to login
-    if (to.meta.requiresAuth) {
+    if (requiresAuth) {
       next('/login')
     } else {
       next()

@@ -41,6 +41,11 @@ function extractRateLimit(headers: Headers) {
 }
 
 export async function proxyFetch(path: string, params?: Record<string, string>): Promise<Response> {
+  // Strict SSRF / Path Traversal validation: path must start with / and cannot begin with // or contain traversal
+  if (!path.startsWith('/') || path.startsWith('//') || path.includes('/../') || path.endsWith('/..') || path === '/..') {
+    throw new Error('Invalid or disallowed proxy path')
+  }
+
   const cacheKey = `${path}:${JSON.stringify(params || {})}`
   const cached = cache.get(cacheKey)
   if (cached) {
@@ -50,13 +55,23 @@ export async function proxyFetch(path: string, params?: Record<string, string>):
   }
 
   const url = new URL(`${GITHUB_API}${path}`)
+
+  // Strict origin defense: guarantee target origin is api.github.com
+  if (url.origin !== GITHUB_API) {
+    throw new Error('SSRF attempt blocked: Invalid target origin')
+  }
+
   if (params) {
     for (const [key, value] of Object.entries(params)) {
       url.searchParams.set(key, value)
     }
   }
 
-  const res = await fetch(url.toString(), { headers: buildHeaders() })
+  // Use redirect: 'error' so Authorization tokens cannot be leaked across cross-origin redirects
+  const res = await fetch(url.toString(), {
+    headers: buildHeaders(),
+    redirect: 'error',
+  })
   extractRateLimit(res.headers)
 
   if (!res.ok) {

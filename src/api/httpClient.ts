@@ -5,14 +5,11 @@ import axios from 'axios'
 import { withRetry } from '../utils/retry'
 import { logger } from '../utils/debug'
 
-const pat = import.meta.env.VITE_GITHUB_PERSONAL_ACCESS_TOKEN || null
-
 export const httpClient = axios.create({
   baseURL: 'https://api.github.com',
   timeout: 15000,
   headers: {
     Accept: 'application/vnd.github.v3+json',
-    ...(pat ? { Authorization: `token ${pat}` } : {}),
   },
 })
 

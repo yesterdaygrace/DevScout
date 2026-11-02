@@ -31,12 +31,12 @@ describe('useSearchHistory', () => {
     expect(history.value[0].query).toBe('vue')
   })
 
-  it('should cap at 10 items', () => {
+  it('should cap at 100 items', () => {
     const { history, addToHistory } = useSearchHistory()
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 115; i++) {
       addToHistory(`query-${i}`)
     }
-    expect(history.value.length).toBeLessThanOrEqual(10)
+    expect(history.value.length).toBeLessThanOrEqual(100)
   })
 
   it('should persist to localStorage', () => {

@@ -3,8 +3,9 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   HomeIcon, MagnifyingGlassIcon, FolderIcon, ArrowsRightLeftIcon,
-  DocumentTextIcon, BookmarkIcon, UserCircleIcon, KeyIcon, SunIcon,
+  DocumentTextIcon, BookmarkIcon, UserCircleIcon, KeyIcon, SunIcon, SparklesIcon,
 } from '@heroicons/vue/24/outline'
+import { seedDashboardData } from '../utils/seedData'
 
 interface CommandItem {
   id: string
@@ -23,6 +24,7 @@ const inputRef = ref<HTMLInputElement | null>(null)
 const commands = computed<CommandItem[]>(() => [
   { id: 'dashboard', label: 'Dashboard', description: 'Go to dashboard', icon: HomeIcon, action: () => router.push('/') },
   { id: 'search', label: 'Search Developers', description: 'Search GitHub developers', icon: MagnifyingGlassIcon, action: () => router.push('/search') },
+  { id: 'seed', label: 'Seed 100 Talent Searches', description: 'Populate 100 GitHub searches & analytics data', icon: SparklesIcon, action: () => { seedDashboardData(true); window.location.reload() } },
   { id: 'collections', label: 'Collections', description: 'Manage candidate collections', icon: FolderIcon, action: () => router.push('/collections') },
   { id: 'compare', label: 'Compare', description: 'Compare developers side-by-side', icon: ArrowsRightLeftIcon, action: () => router.push('/compare') },
   { id: 'notes', label: 'Notes', description: 'View and manage notes', icon: DocumentTextIcon, action: () => router.push('/notes-search') },

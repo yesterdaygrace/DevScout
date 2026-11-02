@@ -1,11 +1,17 @@
 import { Hono } from 'hono'
+import { z } from 'zod'
+import { zValidator } from '@hono/zod-validator'
 import { proxyFetch } from '../services/github.js'
 import { calculateScore } from '../services/score.js'
 
 const score = new Hono()
 
-score.get('/:username', async (c) => {
-  const { username } = c.req.param()
+const usernameParamSchema = z.object({
+  username: z.string().regex(/^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/, 'Invalid GitHub username').max(39),
+})
+
+score.get('/:username', zValidator('param', usernameParamSchema), async (c) => {
+  const { username } = c.req.valid('param')
 
   const [userRes, reposRes] = await Promise.all([
     proxyFetch(`/users/${username}`),
@@ -16,8 +22,14 @@ score.get('/:username', async (c) => {
     return c.json({ error: 'User not found' }, 404)
   }
 
-  const user = await userRes.json() as any
-  const repos = await reposRes.json() as any[]
+  const user = (await userRes.json()) as any
+  let repos: any[] = []
+  if (reposRes.ok) {
+    const reposData = await reposRes.json()
+    if (Array.isArray(reposData)) {
+      repos = reposData
+    }
+  }
 
   const totalStars = repos.reduce((sum: number, r: any) => sum + (r.stargazers_count || 0), 0)
   const languages = new Set<string>()

@@ -41,6 +41,18 @@ describe('export', () => {
       const csv = exportShortlistAsCSV([], [])
       expect(csv).toBe('github_username,notes,shortlisted_at')
     })
+
+    it('should escape CSV formula injection characters in username and notes', () => {
+      const maliciousShortlist: ShortlistItem[] = [
+        { id: '1', user_id: 'u1', github_username: '=cmd|', created_at: '2024-01-15' },
+      ]
+      const maliciousNotes: Note[] = [
+        { id: '1', user_id: 'u1', github_username: '=cmd|', content: '@malicious_payload', created_at: '2024-01-15', updated_at: '2024-01-15' },
+      ]
+      const csv = exportShortlistAsCSV(maliciousShortlist, maliciousNotes)
+      expect(csv).toContain("'=cmd|")
+      expect(csv).toContain('"\'@malicious_payload"')
+    })
   })
 
   describe('exportShortlistAsJSON', () => {

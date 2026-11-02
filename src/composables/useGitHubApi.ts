@@ -55,14 +55,24 @@ export function useGitHubSearch() {
       totalCount.value = data.total_count
     } catch (e: unknown) {
       if (e && typeof e === 'object' && 'response' in e) {
-        const axiosErr = e as { response?: { status?: number } }
+        const axiosErr = e as { response?: { status?: number; data?: any } }
         if (axiosErr.response?.status === 403) {
           error.value = 'GitHub API rate limit reached. Please try again later.'
         } else if (axiosErr.response?.status === 429) {
           error.value = 'Too many requests. Please wait a moment and try again.'
+        } else if (axiosErr.response?.status === 502 || axiosErr.response?.status === 504) {
+          error.value = 'Backend API server on :4001 is unreachable. Please verify the proxy is active.'
+        } else if (axiosErr.response?.data?.message && typeof axiosErr.response.data.message === 'string') {
+          error.value = axiosErr.response.data.message
+        } else if (axiosErr.response?.data?.error && typeof axiosErr.response.data.error === 'string') {
+          error.value = axiosErr.response.data.error
         } else {
           error.value = 'An error occurred while searching. Please try again.'
         }
+      } else if (e instanceof Error && e.message) {
+        error.value = e.message.includes('Network Error')
+          ? 'Unable to connect to the server. Please check your network or backend proxy.'
+          : e.message
       } else {
         error.value = 'An error occurred while searching.'
       }

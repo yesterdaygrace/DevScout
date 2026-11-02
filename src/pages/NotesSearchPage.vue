@@ -3,6 +3,7 @@ import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNotesStore } from '../stores/notes'
 import { marked } from 'marked'
+import { sanitizeHtml } from '../utils/sanitize'
 import { MagnifyingGlassIcon, XMarkIcon, TagIcon, TrashIcon, BookmarkIcon } from '@heroicons/vue/24/outline'
 import { BookmarkIcon as BookmarkSolid } from '@heroicons/vue/24/solid'
 
@@ -143,7 +144,7 @@ function selectTag(tag: string) {
             <TrashIcon class="w-4 h-4" />
           </button>
         </div>
-        <div class="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 line-clamp-4" v-html="marked.parse(note.content)" />
+        <div class="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 line-clamp-4" v-html="sanitizeHtml(marked.parse(note.content) as string)" />
         <div v-if="note.tags && note.tags.length > 0" class="flex flex-wrap gap-1.5 mt-2">
           <span
             v-for="tag in note.tags"

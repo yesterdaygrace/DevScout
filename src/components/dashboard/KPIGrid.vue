@@ -63,7 +63,7 @@ onMounted(() => {
 
 watch(() => props.metrics, (newVal) => {
   if (newVal.length > 0 && !props.loading) animateCounters()
-}, { immediate: false })
+}, { immediate: false, deep: true })
 </script>
 
 <template>

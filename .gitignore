@@ -55,12 +55,14 @@ coverage/
 .omo/
 .codegraph
 .codegraph/
+.codebase-memory/
 .playwright-mcp
 .playwright-mcp/
 .claude/
 .cursor/
 .ruff_cache/
 .cache/
+.vite/
 
 # Temp / cache
 tmp/

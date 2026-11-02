@@ -1,4 +1,4 @@
-import type { GitHubUser, GitHubRepo } from '../types/github'
+import type { GitHubUser, GitHubRepo, DeveloperActivitySummary } from '../types/github'
 
 export interface ScoreFactor {
   name: string
@@ -19,7 +19,7 @@ export interface CandidateScoreResult {
 }
 
 export function useCandidateScore() {
-  function calculateScore(profile: GitHubUser, repos: GitHubRepo[]): CandidateScoreResult {
+  function calculateScore(profile: GitHubUser, repos: GitHubRepo[], activity?: DeveloperActivitySummary | null): CandidateScoreResult {
     const factors: ScoreFactor[] = []
 
     // 1. Repository Quality (weight: 20%)
@@ -140,36 +140,82 @@ export function useCandidateScore() {
     else if (activityRatio > 5) { activityScore = 25; activityDetail = 'Minimal recent activity' }
     else { activityDetail = 'No recent repository activity detected' }
 
+    let activityDescription = `${recent3m} repos active in 3mo, ${recent6m} in 3-6mo`
+    if (activity) {
+      if (activity.pullRequests.total > 0 && activity.pullRequests.mergeRate >= 80) {
+        activityScore = Math.min(100, activityScore + 10)
+        activityDetail += ` · ${activity.pullRequests.mergeRate}% PR merge acceptance`
+      } else if (activity.pullRequests.total > 5 && activity.pullRequests.mergeRate < 30) {
+        activityScore = Math.max(10, activityScore - 15)
+        activityDetail += ` · Low PR merge rate (${activity.pullRequests.mergeRate}%)`
+      }
+      if (activity.recentProjects.length >= 3) {
+        activityScore = Math.min(100, activityScore + 5)
+      }
+      activityDescription = `${recent3m} active repos · ${activity.pullRequests.total} PRs (${activity.pullRequests.mergeRate}% merged) · ${activity.calendar.totalContributions} contributions`
+    }
+
     factors.push({
       name: 'Recent Activity',
       score: activityScore,
       weight: 0.20,
-      description: `${recent3m} repos active in 3mo, ${recent6m} in 3-6mo`,
+      description: activityDescription,
       detail: activityDetail,
       icon: '⚡'
     })
 
-    // 6. Project Consistency (weight: 15%)
-    const repoCount = profile.public_repos
+    // 6. Project & Contribution Consistency (weight: 15%)
     let consistencyScore = 10
     let consistencyDetail = ''
-    if (repoCount > 80) { consistencyScore = 100; consistencyDetail = 'Prolific contributor with extensive portfolio' }
-    else if (repoCount > 50) { consistencyScore = 85; consistencyDetail = 'Very active project creator' }
-    else if (repoCount > 30) { consistencyScore = 70; consistencyDetail = 'Consistent project contributor' }
-    else if (repoCount > 15) { consistencyScore = 50; consistencyDetail = 'Regular project activity' }
-    else if (repoCount > 5) { consistencyScore = 30; consistencyDetail = 'Early stage portfolio' }
-    else { consistencyDetail = 'Just getting started with public repos' }
+    let consistencyDescription = ''
 
-    // Check for pinned/notable repos by looking at descriptions
-    const describedRepos = repos.filter(r => r.description && r.description.length > 20).length
-    const descRatio = repos.length > 0 ? describedRepos / repos.length : 0
-    if (descRatio > 0.5 && consistencyScore > 30) consistencyScore = Math.min(100, consistencyScore + 5)
+    if (activity && activity.consistency) {
+      const { activeWeeks, activeWeeksRatio, longestStreak, tier } = activity.consistency
+      if (activeWeeksRatio >= 0.80) {
+        consistencyScore = 100
+        consistencyDetail = `Exceptional consistency — active ${activeWeeks}/52 weeks (${tier})`
+      } else if (activeWeeksRatio >= 0.60) {
+        consistencyScore = 85
+        consistencyDetail = `High consistency — active ${activeWeeks}/52 weeks (${tier})`
+      } else if (activeWeeksRatio >= 0.40) {
+        consistencyScore = 70
+        consistencyDetail = `Moderate consistency — active ${activeWeeks}/52 weeks (${tier})`
+      } else if (activeWeeksRatio >= 0.20) {
+        consistencyScore = 45
+        consistencyDetail = `Sporadic contributions — active ${activeWeeks}/52 weeks (${tier})`
+      } else if (activeWeeks > 0) {
+        consistencyScore = 25
+        consistencyDetail = `Intermittent public contributions (${activeWeeks} weeks active)`
+      } else {
+        consistencyScore = 10
+        consistencyDetail = 'No public contributions recorded in past 52 weeks'
+      }
+
+      if (longestStreak >= 14 && consistencyScore < 100) {
+        consistencyScore = Math.min(100, consistencyScore + 5)
+      }
+
+      consistencyDescription = `${activeWeeks}/52 weeks active · ${longestStreak}d longest streak · ${tier}`
+    } else {
+      const repoCount = profile.public_repos
+      if (repoCount > 80) { consistencyScore = 100; consistencyDetail = 'Prolific contributor with extensive portfolio' }
+      else if (repoCount > 50) { consistencyScore = 85; consistencyDetail = 'Very active project creator' }
+      else if (repoCount > 30) { consistencyScore = 70; consistencyDetail = 'Consistent project contributor' }
+      else if (repoCount > 15) { consistencyScore = 50; consistencyDetail = 'Regular project activity' }
+      else if (repoCount > 5) { consistencyScore = 30; consistencyDetail = 'Early stage portfolio' }
+      else { consistencyDetail = 'Just getting started with public repos' }
+
+      const describedRepos = repos.filter(r => r.description && r.description.length > 20).length
+      const descRatio = repos.length > 0 ? describedRepos / repos.length : 0
+      if (descRatio > 0.5 && consistencyScore > 30) consistencyScore = Math.min(100, consistencyScore + 5)
+      consistencyDescription = `${repoCount} public repos · ${describedRepos} with detailed descriptions`
+    }
 
     factors.push({
       name: 'Project Consistency',
       score: consistencyScore,
       weight: 0.15,
-      description: `${repoCount} public repos · ${describedRepos} with detailed descriptions`,
+      description: consistencyDescription,
       detail: consistencyDetail,
       icon: '📊'
     })

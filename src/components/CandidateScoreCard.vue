@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
-import type { GitHubUser, GitHubRepo } from '../types/github'
+import type { GitHubUser, GitHubRepo, DeveloperActivitySummary } from '../types/github'
 import { useCandidateScore } from '../composables/useCandidateScore'
 import { ChevronDownIcon, ChevronUpIcon, TrophyIcon, CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/vue/24/outline'
 
 interface Props {
   profile: GitHubUser
   repos: GitHubRepo[]
+  activity?: DeveloperActivitySummary | null
 }
 
 const props = defineProps<Props>()
@@ -15,7 +16,7 @@ const { calculateScore, getScoreColor, getScoreLabel } = useCandidateScore()
 const showDetails = ref(false)
 const animatedScore = ref(0)
 
-const scoreResult = computed(() => calculateScore(props.profile, props.repos))
+const scoreResult = computed(() => calculateScore(props.profile, props.repos, props.activity))
 const scoreColor = computed(() => getScoreColor(scoreResult.value.total))
 const scoreLabel = computed(() => getScoreLabel(scoreResult.value.total))
 

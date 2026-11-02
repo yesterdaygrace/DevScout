@@ -5,6 +5,14 @@ import type { User } from '@supabase/supabase-js'
 import { logger } from '../utils/debug'
 import { useToastStore } from './toast'
 
+function maskEmail(email?: string | null): string {
+  if (!email) return ''
+  const [name, domain] = email.split('@')
+  if (!domain) return '***'
+  const visible = name && name.length > 0 ? name[0] : ''
+  return `${visible}***@${domain}`
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const loading = ref(true)
@@ -23,32 +31,32 @@ export const useAuthStore = defineStore('auth', () => {
     if (error) logger.error('AUTH', 'getUser failed', error)
     user.value = data.user
     loading.value = false
-    logger.info('AUTH', 'initialized', { user: data.user?.email ?? null })
+    logger.info('AUTH', 'initialized', { user: maskEmail(data.user?.email) })
 
     supabase.auth.onAuthStateChange((event, session) => {
-      logger.info('AUTH', 'state changed', { event, user: session?.user?.email ?? null })
+      logger.info('AUTH', 'state changed', { event, user: maskEmail(session?.user?.email) })
       user.value = session?.user ?? null
     })
   }
 
   async function login(email: string, password: string) {
-    logger.info('AUTH', 'login', { email })
+    logger.info('AUTH', 'login', { email: maskEmail(email) })
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
-      logger.error('AUTH', 'login failed', error, { email })
+      logger.error('AUTH', 'login failed', error, { email: maskEmail(email) })
       throw error
     }
-    logger.info('AUTH', 'login OK', { email })
+    logger.info('AUTH', 'login OK', { email: maskEmail(email) })
   }
 
   async function signup(email: string, password: string) {
-    logger.info('AUTH', 'signup', { email })
+    logger.info('AUTH', 'signup', { email: maskEmail(email) })
     const { error } = await supabase.auth.signUp({ email, password })
     if (error) {
-      logger.error('AUTH', 'signup failed', error, { email })
+      logger.error('AUTH', 'signup failed', error, { email: maskEmail(email) })
       throw error
     }
-    logger.info('AUTH', 'signup OK — confirmation may be required', { email })
+    logger.info('AUTH', 'signup OK — confirmation may be required', { email: maskEmail(email) })
   }
 
   async function loginWithGithub() {

@@ -1,11 +1,13 @@
 import type { ShortlistItem, Note } from '../types/domain'
+import { sanitizeCsvField } from './sanitize'
 
 export function exportShortlistAsCSV(shortlist: ShortlistItem[], notes: Note[]): string {
   const header = 'github_username,notes,shortlisted_at'
   const rows = shortlist.map(item => {
     const note = notes.find(n => n.github_username === item.github_username)
-    const noteContent = note ? `"${note.content.replace(/"/g, '""')}"` : ''
-    return `${item.github_username},${noteContent},${item.created_at}`
+    const username = sanitizeCsvField(item.github_username)
+    const noteContent = note ? `"${sanitizeCsvField(note.content).replace(/"/g, '""')}"` : ''
+    return `${username},${noteContent},${item.created_at}`
   })
   return [header, ...rows].join('\n')
 }

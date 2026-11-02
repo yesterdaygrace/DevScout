@@ -1,20 +1,39 @@
 import type { User } from '@supabase/supabase-js'
+import { generateDefaultMockDb, type MockRow } from '../utils/seedData'
 
-interface MockRow {
-  id: string
-  user_id: string
-  [key: string]: unknown
+const MOCK_STORAGE_KEY = 'devscout_mock_db'
+
+function loadMockDb(): Record<string, MockRow[]> {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const stored = localStorage.getItem(MOCK_STORAGE_KEY)
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (parsed && typeof parsed === 'object') return parsed
+      }
+    }
+  } catch {}
+  return generateDefaultMockDb()
 }
 
-const mockDb: Record<string, MockRow[]> = {
-  profiles: [],
-  shortlist: [],
-  notes: [],
-  recently_viewed: [],
-  saved_searches: [],
-  collections: [],
-  collection_members: [],
+export function saveMockDb() {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(mockDb))
+    }
+  } catch {}
 }
+
+export function reloadMockDb(): Record<string, MockRow[]> {
+  const loaded = loadMockDb()
+  for (const k of Object.keys(mockDb)) {
+    delete mockDb[k]
+  }
+  Object.assign(mockDb, loaded)
+  return mockDb
+}
+
+export const mockDb: Record<string, MockRow[]> = loadMockDb()
 
 let currentUser: User | null = null
 let authListeners: Array<(event: string, session: { user: User } | null) => void> = []
@@ -122,10 +141,14 @@ export const mockSupabase = {
         data: allRows(),
       }
     },
-    insert: (row: Record<string, unknown>) => {
-      const newRow = { id: genId(), user_id: getUserId(), ...row } as MockRow
-      const arr = mockDb[table as keyof typeof mockDb]
-      if (arr) arr.unshift(newRow)
+    insert: (row: Record<string, unknown> | Array<Record<string, unknown>>) => {
+      const rows = Array.isArray(row) ? row : [row]
+      const arr = mockDb[table as keyof typeof mockDb] || []
+      for (const r of rows) {
+        arr.unshift({ id: genId(), user_id: getUserId(), ...r })
+      }
+      mockDb[table as keyof typeof mockDb] = arr
+      saveMockDb()
       return { error: null }
     },
     update: (updates: Record<string, unknown>) => {
@@ -141,7 +164,10 @@ export const mockSupabase = {
             const idx = arr.findIndex(r =>
               conditions.every(([c, v]) => r[c] === v) && r.user_id === getUserId()
             )
-            if (idx !== -1) Object.assign(arr[idx], updates)
+            if (idx !== -1) {
+              Object.assign(arr[idx], updates)
+              saveMockDb()
+            }
           }
           resolve({ error: null })
         },
@@ -161,7 +187,10 @@ export const mockSupabase = {
             const idx = arr.findIndex(r =>
               conditions.every(([c, v]) => r[c] === v) && r.user_id === getUserId()
             )
-            if (idx !== -1) arr.splice(idx, 1)
+            if (idx !== -1) {
+              arr.splice(idx, 1)
+              saveMockDb()
+            }
           }
           resolve({ error: null })
         },

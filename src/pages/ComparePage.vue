@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
 import { useCompareStore } from '../stores/compare'
-import { getSkillBreakdown, getUser, getUserRepos } from '../api/github'
+import { getSkillBreakdown, getUser, getUserRepos, getUserActivity } from '../api/github'
 import { useCandidateScore } from '../composables/useCandidateScore'
-import type { GitHubUser, GitHubRepo, SkillBreakdown } from '../types/github'
+import type { GitHubUser, GitHubRepo, SkillBreakdown, DeveloperActivitySummary } from '../types/github'
 import { XMarkIcon, CodeBracketIcon, ArrowTrendingUpIcon, TrophyIcon } from '@heroicons/vue/24/outline'
 
 const compareStore = useCompareStore()
@@ -13,13 +13,14 @@ interface ProfileData {
   user: GitHubUser
   repos: GitHubRepo[]
   skills: SkillBreakdown[]
+  activity?: DeveloperActivitySummary | null
 }
 
 const profiles = ref<ProfileData[]>([])
 const loading = ref(false)
 
 const scoreResults = computed(() =>
-  profiles.value.map(p => calculateScore(p.user, p.repos))
+  profiles.value.map(p => calculateScore(p.user, p.repos, p.activity))
 )
 
 const totalStarsList = computed(() =>
@@ -73,6 +74,22 @@ const accountAge = computed(() =>
   })
 )
 
+const activeWeeksList = computed(() =>
+  profiles.value.map(p => p.activity?.consistency?.activeWeeks ?? 0)
+)
+
+const prMergeRateList = computed(() =>
+  profiles.value.map(p => p.activity?.pullRequests?.mergeRate ?? 0)
+)
+
+const consistencyTierList = computed(() =>
+  profiles.value.map(p => p.activity?.consistency?.tier ?? 'N/A')
+)
+
+const externalContribsList = computed(() =>
+  profiles.value.map(p => p.activity?.externalContributions?.length ?? 0)
+)
+
 /**
  * Find the index(es) with the max value for a given metric array.
  * For "lower is better" metrics like fork ratio, invert the comparison.
@@ -88,12 +105,13 @@ onMounted(async () => {
   loading.value = true
   const results = await Promise.all(
     compareStore.usernames.map(async (username) => {
-      const [user, repos, skills] = await Promise.all([
+      const [user, repos, skills, activity] = await Promise.all([
         getUser(username),
         getUserRepos(username),
         getSkillBreakdown(username),
+        getUserActivity(username).catch(() => null),
       ])
-      return { user, repos, skills }
+      return { user, repos, skills, activity }
     })
   )
   profiles.value = results
@@ -250,6 +268,9 @@ onMounted(async () => {
               <tbody class="divide-y divide-dash-border/30">
                 <tr v-for="metric in [
                   { label: 'Score', values: scoreResults.map(s => s.total), getCell: (idx: number) => scoreResults[idx]?.total ?? 0, format: (v: number) => v.toString(), lowerBetter: false },
+                  { label: 'Active Weeks (Yr)', values: activeWeeksList, getCell: (idx: number) => activeWeeksList[idx] ?? 0, format: (v: number) => `${v}/52 wks`, lowerBetter: false },
+                  { label: 'PR Merge Rate', values: prMergeRateList, getCell: (idx: number) => prMergeRateList[idx] ?? 0, format: (v: number) => `${v}%`, lowerBetter: false },
+                  { label: 'External Contribs', values: externalContribsList, getCell: (idx: number) => externalContribsList[idx] ?? 0, format: (v: number) => `${v} repos`, lowerBetter: false },
                   { label: 'Repositories', values: profiles.map(p => p.user.public_repos), getCell: (idx: number) => profiles[idx]?.user.public_repos ?? 0, format: (v: number) => v.toString(), lowerBetter: false },
                   { label: 'Followers', values: profiles.map(p => p.user.followers), getCell: (idx: number) => profiles[idx]?.user.followers ?? 0, format: (v: number) => v.toLocaleString(), lowerBetter: false },
                   { label: 'Total Stars', values: totalStarsList, getCell: (idx: number) => totalStarsList[idx] ?? 0, format: (v: number) => v.toLocaleString(), lowerBetter: false },
@@ -265,6 +286,14 @@ onMounted(async () => {
                       class="w-4 h-4 text-dash-warning inline-block ml-1 -mt-0.5"
                       title="Leader"
                     />
+                  </td>
+                </tr>
+                <tr>
+                  <td class="py-2 pr-4 text-dash-text-tertiary">Consistency Tier</td>
+                  <td v-for="(tier, idx) in consistencyTierList" :key="idx" class="text-center py-2 px-3">
+                    <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      {{ tier }}
+                    </span>
                   </td>
                 </tr>
                 <tr>

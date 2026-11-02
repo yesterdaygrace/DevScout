@@ -150,21 +150,14 @@ function buildGitHubQuery(): string {
   const parts: string[] = []
   if (filters.value.username) parts.push(`user:${filters.value.username}`)
   if (textQuery) parts.push(textQuery)
-  if (!parts.length) return ''
   if (filters.value.language) parts.push(`language:${filters.value.language}`)
   if (filters.value.location) parts.push(`location:"${filters.value.location}"`)
   if (filters.value.minFollowers !== undefined && filters.value.minFollowers > 0) parts.push(`followers:>=${filters.value.minFollowers}`)
   if (filters.value.minRepos !== undefined && filters.value.minRepos > 0) parts.push(`repos:>=${filters.value.minRepos}`)
   if (filters.value.organization) parts.push(`org:${filters.value.organization}`)
-  if (filters.value.minPushed) parts.push(`pushed:>${filters.value.minPushed}`)
-  if (filters.value.openSourceContributors) parts.push(`good-first-issues:>0`)
-  if (filters.value.topics) {
-    const topics = filters.value.topics.split(',').map(t => t.trim()).filter(Boolean)
-    for (const topic of topics) parts.push(`topic:${topic}`)
-  }
-  if (filters.value.minStars !== undefined && filters.value.minStars > 0) parts.push(`stars:>=${filters.value.minStars}`)
   if (filters.value.joinedSince) parts.push(`created:>${filters.value.joinedSince}`)
-  if (filters.value.hasPortfolio) parts.push(`has:portfolio`)
+
+  if (!parts.length) return ''
   return parts.join(' ')
 }
 
@@ -232,9 +225,7 @@ watch(filters, () => {
     <div class="space-y-6">
       <div class="flex items-start justify-between gap-6">
         <div>
-          <p class="text-[11px] font-semibold tracking-[0.18em] uppercase text-white/30 mb-3">Discover — GitHub talent</p>
-          <h1 class="text-section text-white">Search developers</h1>
-          <p class="mt-3 text-sm text-white/40 max-w-xl">Type a name, stack, or location. Use language pills or refine with filters. GitHub is the source of truth — we add the workspace.</p>
+          <h1 class="text-2xl font-bold">Search Developers</h1>
         </div>
         <button
           @click="showFilters = !showFilters"
@@ -291,7 +282,7 @@ watch(filters, () => {
           <div class="p-2">
             <p class="px-3 py-2 text-[11px] font-semibold tracking-[0.14em] uppercase text-white/30">Recent searches</p>
             <button
-              v-for="item in history"
+              v-for="item in history.slice(0, 8)"
               :key="item.id"
               @click="applyHistoryItem(item)"
               class="w-full text-left px-3 py-2.5 hover:bg-white/[0.06] rounded-[var(--radius-md)] transition-colors flex items-center justify-between group cursor-pointer"

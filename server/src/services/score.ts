@@ -7,6 +7,8 @@ export interface ScoreInput {
   accountAgeDays: number
   hasWebsite: boolean
   hasBio: boolean
+  activeWeeksRatio?: number
+  prMergeRate?: number
 }
 
 export interface ScoreResult {
@@ -33,8 +35,13 @@ export function calculateScore(input: ScoreInput): ScoreResult {
   const communityScore = Math.min(input.followers / MAX_FOLLOWERS_SCORE, 1) * 20
   const starsScore = Math.min(input.totalStars / MAX_STARS_SCORE, 1) * 20
   const langScore = Math.min(input.languages / MAX_LANGUAGES, 1) * 15
-  const activityScore = input.recentActivity ? 15 : 0
-  const consistencyScore = Math.min(input.accountAgeDays / MAX_ACCOUNT_AGE, 1) * 10
+  let activityScore = input.recentActivity ? 15 : 0
+  if (input.prMergeRate !== undefined && input.prMergeRate >= 80) {
+    activityScore = Math.min(20, activityScore + 5)
+  }
+  const consistencyScore = input.activeWeeksRatio !== undefined
+    ? Math.min(input.activeWeeksRatio, 1) * 10
+    : Math.min(input.accountAgeDays / MAX_ACCOUNT_AGE, 1) * 10
 
   const total = Math.round(repoScore + communityScore + starsScore + langScore + activityScore + consistencyScore)
 
@@ -44,6 +51,8 @@ export function calculateScore(input: ScoreInput): ScoreResult {
   if (input.totalStars >= 1000) strengths.push('High-impact projects')
   if (input.languages >= 4) strengths.push('Diverse language skills')
   if (input.recentActivity) strengths.push('Active in recent months')
+  if (input.activeWeeksRatio !== undefined && input.activeWeeksRatio >= 0.7) strengths.push('Highly consistent annual activity')
+  if (input.prMergeRate !== undefined && input.prMergeRate >= 80) strengths.push('Strong PR merge acceptance rate')
   if (input.hasWebsite) strengths.push('Has portfolio website')
   if (input.hasBio) strengths.push('Complete GitHub profile')
 

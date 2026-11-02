@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useDashboardStats } from '../composables/useDashboardStats'
 import { useRecentlyViewedStore } from '../stores/recentlyViewed'
 import { useShortlistStore } from '../stores/shortlist'
 import { useSavedSearchesStore } from '../stores/savedSearches'
+import { useSearchHistory } from '../composables/useSearchHistory'
+import { useToastStore } from '../stores/toast'
+import { seedDashboardData } from '../utils/seedData'
+import { reloadMockDb } from '../services/mock'
 
 import KPIGrid from '../components/dashboard/KPIGrid.vue'
 import SearchAnalytics from '../components/dashboard/SearchAnalytics.vue'
@@ -22,6 +26,9 @@ const {
   insights, activityFeed,
 } = useDashboardStats()
 
+const { reloadHistory } = useSearchHistory()
+const toast = useToastStore()
+
 const recentlyViewedStore_local = useRecentlyViewedStore()
 const shortlistStore = useShortlistStore()
 const savedSearchesStore = useSavedSearchesStore()
@@ -30,6 +37,12 @@ const loading = ref(true)
 const recentlyCompared = ref<string[][]>([])
 
 onMounted(async () => {
+  // If search history has <= 1 items or collections are empty, auto-seed 100 talent searches & full data
+  if (kpiMetrics.value.searches.total <= 1) {
+    seedDashboardData(true)
+    reloadMockDb()
+    reloadHistory()
+  }
   await Promise.all([
     recentlyViewedStore_local.fetch(),
     shortlistStore.fetch(),
@@ -39,6 +52,24 @@ onMounted(async () => {
   loadRecentlyCompared()
   loading.value = false
 })
+
+async function handleQuickAction(id: string) {
+  if (id === 'seed') {
+    loading.value = true
+    seedDashboardData(true)
+    reloadMockDb()
+    reloadHistory()
+    await Promise.all([
+      recentlyViewedStore_local.fetch(),
+      shortlistStore.fetch(),
+      savedSearchesStore.fetch(),
+      collectionsStore.fetch(),
+    ])
+    loadRecentlyCompared()
+    loading.value = false
+    toast.success('Generated 100 GitHub talent searches & analytics!')
+  }
+}
 
 function loadRecentlyCompared() {
   try {
@@ -54,12 +85,12 @@ function loadRecentlyCompared() {
   } catch { /* ignore */ }
 }
 
-const kpiData = [
+const kpiData = computed(() => [
   { title: 'Searches', value: kpiMetrics.value.searches.total, secondary: `${kpiMetrics.value.searches.today} today`, icon: 'search', trend: kpiMetrics.value.searches.trend, link: '/search', color: 'indigo' },
   { title: 'Collections', value: kpiMetrics.value.collections.total, secondary: `${kpiMetrics.value.collections.totalMembers} candidates`, icon: 'collection', trend: null, link: '/collections', color: 'emerald' },
   { title: 'Shortlisted', value: kpiMetrics.value.shortlisted.total, secondary: `+${kpiMetrics.value.shortlisted.addedToday} today`, icon: 'shortlist', trend: null, link: '/search', color: 'amber' },
   { title: 'Saved Searches', value: kpiMetrics.value.savedSearches.total, secondary: kpiMetrics.value.savedSearches.mostUsed, icon: 'saved', trend: null, link: '/searches', color: 'violet' },
-]
+])
 </script>
 
  <template>
@@ -86,7 +117,7 @@ const kpiData = [
 
       <!-- Sidebar: sticky, muted -->
       <div class="lg:col-span-4 space-y-6 lg:sticky lg:top-[88px] self-start">
-        <QuickActions @action="() => {}" />
+        <QuickActions @action="handleQuickAction" />
         <ActivityFeed :events="activityFeed" :loading="loading" />
       </div>
     </div>

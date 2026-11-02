@@ -1,4 +1,4 @@
-const DEBUG = true
+const DEBUG = import.meta.env.DEV
 
 type LogLevel = 'info' | 'warn' | 'error' | 'debug'
 
@@ -80,7 +80,7 @@ export const logger = {
   },
 }
 
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
   ;(window as unknown as Record<string, unknown>).__debug = {
     logger,
     getLogs: () => logger.copyLogs(),

@@ -10,7 +10,9 @@ import { useCompareStore } from '../stores/compare'
 import { useRecentlyViewedStore } from '../stores/recentlyViewed'
 import { useCollectionsStore } from '../stores/collections'
 import CandidateScoreCard from '../components/CandidateScoreCard.vue'
+import DeveloperActivitySection from '../components/activity/DeveloperActivitySection.vue'
 import MarkdownEditor from '../components/MarkdownEditor.vue'
+import { useDeveloperActivity } from '../composables/useDeveloperActivity'
 import { Doughnut } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -19,6 +21,7 @@ import {
   Legend,
 } from 'chart.js'
 import { marked } from 'marked'
+import { sanitizeHtml } from '../utils/sanitize'
 import { StarIcon as StarOutline, DocumentPlusIcon, CodeBracketIcon, FolderPlusIcon } from '@heroicons/vue/24/outline'
 import { StarIcon as StarSolid } from '@heroicons/vue/24/solid'
 import { ref } from 'vue'
@@ -27,13 +30,14 @@ ChartJS.register(ArcElement, Tooltip, Legend)
 
 const renderedNote = computed(() => {
   if (!noteContent.value) return ''
-  return marked.parse(noteContent.value)
+  return sanitizeHtml(marked.parse(noteContent.value) as string)
 })
 
 const route = useRoute()
 const username = computed(() => route.params.username as string)
 const { profile, repos, loading, error, load } = useGitHubProfile()
 const { skills, loading: skillsLoading, load: loadSkills } = useSkillBreakdown()
+const { activity, loading: activityLoading, error: activityError, load: loadActivity } = useDeveloperActivity()
 const shortlistStore = useShortlistStore()
 const notesStore = useNotesStore()
 const compareStore = useCompareStore()
@@ -106,6 +110,7 @@ async function loadProfile() {
   await Promise.all([
     load(username.value),
     loadSkills(username.value),
+    loadActivity(username.value),
     shortlistStore.fetch(),
     notesStore.fetch(),
     getUserPRs(username.value).then(n => { prCount.value = n }).catch(() => {}),
@@ -273,8 +278,17 @@ watch(username, loadProfile)
       </div>
     </section>
 
+    <!-- Developer Activity & Contribution Intelligence -->
+    <DeveloperActivitySection
+      :username="username"
+      :activity="activity"
+      :loading="activityLoading"
+      :error="activityError"
+      @retry="loadActivity(username)"
+    />
+
     <!-- Candidate Score -->
-    <CandidateScoreCard v-if="profile && repos.length > 0" :profile="profile" :repos="repos" />
+    <CandidateScoreCard v-if="profile && repos.length > 0" :profile="profile" :repos="repos" :activity="activity" />
 
     <section class="rounded-[var(--radius-lg)] border border-white/10 bg-white/[0.04] p-6 lg:p-8">
       <div class="flex items-center justify-between mb-4">

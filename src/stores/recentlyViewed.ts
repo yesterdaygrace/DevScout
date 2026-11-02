@@ -32,5 +32,16 @@ export const useRecentlyViewedStore = defineStore('recentlyViewed', () => {
       .insert({ user_id: auth.user.id, github_username: githubUsername, viewed_at: new Date().toISOString() })
   }
 
-  return { items, loading, fetch, add }
+  async function clear() {
+    const auth = useAuthStore()
+    if (!auth.user) return
+
+    await supabase
+      .from('recently_viewed')
+      .delete()
+      .eq('user_id', auth.user.id)
+    items.value = []
+  }
+
+  return { items, loading, fetch, add, clear }
 })
