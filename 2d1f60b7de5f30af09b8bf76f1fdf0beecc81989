@@ -1,0 +1,24 @@
+26-11-02 Details:
+
+- Security & Hardening:
+  * Added DOMPurify sanitization in src/utils/sanitize.ts for HTML rendering and CSV formula injection prevention (CWE-1236)
+  * Implemented Zod schema validation boundaries for GitHub API endpoints (query length, pagination limits, safe usernames)
+  * Set up strict security headers middleware (HSTS, CSP, X-Frame-Options, X-Content-Type-Options)
+  * Hardened rate limiting middleware with sliding window checks and client IP extraction
+  * Removed insecure client-side GitHub PAT entry from ApiSettings in favor of secure server proxy
+
+- Developer Activity & Recruiter Intelligence:
+  * Created activity tracking service (server/src/services/activity.ts) for commit velocity, PR audits, and issue tracking
+  * Added useDeveloperActivity composable (src/composables/useDeveloperActivity.ts)
+  * Added UI components: ContributionHeatmap, DeveloperActivitySection, ProjectActivityTimeline, and PullRequestAudit
+
+- UI & State Improvements:
+  * Refactored CandidateScoreCard, MarkdownEditor, ComparePage, DashboardPage, and ApiSettings
+  * Added concurrent dev runner (scripts/dev.js) for Vite client and Hono server
+  * Added talent search templates and mock seed data generator (src/utils/seedData.ts)
+  * Cleaned Supabase migrations and updated schema definitions
+
+- Quality & CI:
+  * Expanded Vitest test suite with new tests for security, sanitization, export, and developer activity (15 test suites, 98 passing tests)
+  * Updated GitHub Actions CI workflow to run security checks, client/server type checks, and unit tests
+  * Updated .gitignore to exclude .codebase-memory and .vite caches
