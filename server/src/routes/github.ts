@@ -53,7 +53,8 @@ const searchIssuesSchema = z.object({
 })
 github.get('/search/issues', zValidator('query', searchIssuesSchema), async (c) => {
   const { q, per_page } = c.req.valid('query')
-  const res = await proxyFetch('/search/issues', { q, per_page: String(per_page) })
+  // The proxy holds a server PAT: restrict to public data so a token with private access cannot leak it
+  const res = await proxyFetch('/search/issues', { q: `${q} is:public`, per_page: String(per_page) })
   return new Response(res.body, { status: res.status, headers: res.headers })
 })
 

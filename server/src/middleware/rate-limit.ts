@@ -1,4 +1,6 @@
+import type { Context } from 'hono'
 import { createMiddleware } from 'hono/factory'
+import { getConnInfo } from '@hono/node-server/conninfo'
 
 const windowMs = 60_000
 const maxRequests = 60
@@ -34,51 +36,43 @@ function pruneExpiredEntries(now: number) {
 }
 
 /**
- * Extract client IP address safely from request headers.
- * Protects against IP spoofing by not blindly trusting untrusted X-Forwarded-For headers
- * unless running behind a recognized reverse proxy (e.g. Vercel or TRUST_PROXY=true).
+ * Extract the client IP. Forwarded headers are client-controlled unless a trusted ingress sets
+ * them, so they are honoured only when running on Vercel or with TRUST_PROXY=true. Otherwise the
+ * socket address is used.
  */
-function getClientIp(cReq: { header: (name: string) => string | undefined }): string {
-  // 1. Check verified Vercel Edge infrastructure header (cannot be spoofed from outside)
-  const vercelIp = cReq.header('x-vercel-forwarded-for')
-  if (vercelIp) {
-    const firstIp = vercelIp.split(',')[0]?.trim()
-    if (firstIp && firstIp.length <= 45) {
-      return firstIp
-    }
-  }
-
-  // 2. Only trust X-Forwarded-For if explicitly running behind a trusted proxy
+function getClientIp(c: Context): string {
   const trustProxy = process.env.TRUST_PROXY === 'true' || process.env.VERCEL === '1'
   if (trustProxy) {
-    const realIp = cReq.header('x-real-ip')
-    if (realIp && realIp.trim().length <= 45) {
-      return realIp.trim()
+    const vercelIp = c.req.header('x-vercel-forwarded-for')
+    if (vercelIp) {
+      const firstIp = vercelIp.split(',')[0]?.trim()
+      if (firstIp && firstIp.length <= 45) return firstIp
     }
 
-    const xff = cReq.header('x-forwarded-for')
+    const realIp = c.req.header('x-real-ip')
+    if (realIp && realIp.trim().length <= 45) return realIp.trim()
+
+    const xff = c.req.header('x-forwarded-for')
     if (xff) {
-      // In trusted proxy setups where proxy appends client IP, take rightmost address before proxy
+      // Trusted proxy appends the client IP: take the rightmost entry
       const parts = xff.split(',').map((s) => s.trim()).filter(Boolean)
       const targetIp = parts[parts.length - 1]
-      if (targetIp && targetIp.length <= 45) {
-        return targetIp
-      }
+      if (targetIp && targetIp.length <= 45) return targetIp
     }
   }
 
-  // 3. Fallback to direct x-real-ip if provided or local fallback
-  const directRealIp = cReq.header('x-real-ip')
-  if (directRealIp && directRealIp.trim().length <= 45) {
-    return directRealIp.trim()
+  try {
+    const address = getConnInfo(c).remote.address
+    if (address) return address
+  } catch {
+    // No socket info available (e.g. in-process test request)
   }
-
   return 'local-client'
 }
 
 export const rateLimit = createMiddleware(async (c, next) => {
   const now = Date.now()
-  const ip = getClientIp(c.req)
+  const ip = getClientIp(c)
 
   // Periodic cleanup trigger (every 100 requests or on table overflow)
   if (hitCounts.size >= MAX_RATE_LIMIT_ENTRIES || Math.random() < 0.01) {

@@ -23,7 +23,7 @@
 
 - **GitHub PAT:** `GITHUB_PAT` in `server/.env` only (`server/src/services/github.ts:9 getPat()` → `Authorization: token <pat>` + `User-Agent`, `Cache` 30m/200). Client `VITE_GITHUB_PERSONAL_ACCESS_TOKEN` deprecated (`src/services/githubService.ts:138 getGitHubToken() → null`, `isUsingPAT() → false`). Never commit PAT; rotate via Vercel env.
 - **Supabase anon key:** `VITE_SUPABASE_ANON_KEY` is public by design but RLS still applies; `service_role` key must never be client-exposed.
-- **OAuth:** `VITE_GITHUB_CLIENT_ID/SECRET` → Supabase Auth Providers; callback `https://<project>.supabase.co/auth/v1/callback` (no trailing slash).
+- **OAuth:** GitHub OAuth client ID/secret are configured in Supabase Auth Providers only (never as `VITE_` variables, which are bundled into the public client); callback `https://<project>.supabase.co/auth/v1/callback` (no trailing slash).
 
 ## Validation & Hardening
 

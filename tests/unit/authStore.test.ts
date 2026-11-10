@@ -101,6 +101,15 @@ describe('authStore', () => {
     expect(mockSignUp).toHaveBeenCalledWith({ email: 'new@test.com', password: 'pass' })
   })
 
+  it('clears per-user browser caches on logout', async () => {
+    localStorage.setItem('search_history', '["rust"]')
+    localStorage.setItem('recently_compared', '[]')
+    const store = useAuthStore()
+    await store.logout()
+    expect(localStorage.getItem('search_history')).toBeNull()
+    expect(localStorage.getItem('recently_compared')).toBeNull()
+  })
+
   it('should call signOut on logout', async () => {
     const store = useAuthStore()
     await store.logout()

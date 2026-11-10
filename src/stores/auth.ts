@@ -13,6 +13,20 @@ function maskEmail(email?: string | null): string {
   return `${visible}***@${domain}`
 }
 
+// Browser-side per-user caches that must not survive into the next account on a shared browser
+const USER_SCOPED_STORAGE_KEYS = [
+  'search_history', 'recently_compared', 'dashboard_activity', 'saved_searches_favorites',
+  'saved_searches_usage', 'notes_pinned', 'collection_styles',
+]
+
+function clearUserScopedStorage() {
+  try {
+    for (const key of USER_SCOPED_STORAGE_KEYS) localStorage.removeItem(key)
+  } catch {
+    // Storage unavailable; nothing to clear
+  }
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const loading = ref(true)
@@ -76,6 +90,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function logout() {
     logger.info('AUTH', 'logout')
     await supabase.auth.signOut()
+    clearUserScopedStorage()
     toast().info('Signed out')
   }
 

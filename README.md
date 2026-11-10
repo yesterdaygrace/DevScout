@@ -213,7 +213,8 @@ npm run dev          # http://localhost:4000
 |---|---|---|
 | `VITE_SUPABASE_URL` | `.env` | Supabase URL |
 | `VITE_SUPABASE_ANON_KEY` | `.env` | Supabase anon key |
-| `VITE_GITHUB_CLIENT_ID` / `VITE_GITHUB_CLIENT_SECRET` | `.env` | GitHub OAuth |
+| `VITE_ALLOW_MOCK` | `.env` | Set `true` only for an intentional demo build; production builds without Supabase vars otherwise refuse to start |
+| GitHub OAuth client ID/secret | Supabase Dashboard | Configure under Auth → Providers → GitHub; never use a `VITE_` variable for the secret |
 | `GITHUB_PAT` | `server/.env` | **Recommended** — server PAT (5000 req/hr) |
 | `VITE_GITHUB_PERSONAL_ACCESS_TOKEN` | `.env` | Deprecated — server `GITHUB_PAT` preferred (`getGitHubToken() → null`) |
 | `PORT` | `server/.env` | Hono port (default 4001) |
